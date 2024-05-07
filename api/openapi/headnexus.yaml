@@ -1,0 +1,646 @@
+openapi: 3.0.0
+info:
+  title: Virtual LAN Management API
+  description: API for managing your virtual LAN
+  version: 1.0.0
+servers:
+  - url: http://your-api-url.com
+paths:
+  /api/v1/rules:
+    get:
+      operationId: listRule
+      summary: List all rules
+      tags:
+        - rule
+      parameters:
+        - in: query
+          name: ruleFindOptions
+          schema:
+            $ref: '#/components/schemas/RuleFindOptions'
+          description: Options for filtering, sorting, and pagination
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rule'
+    post:
+      operationId: createRule
+      summary: createRule
+      tags:
+        - rule
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rule'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rule'
+  /api/v1/rules/{id}:
+    delete:
+      operationId: deleteRule
+      summary: deleteRule
+      tags:
+        - rule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+  /api/v1/hosts:
+    get:
+      operationId: listHost
+      summary: List all hosts
+      tags:
+        - host
+      parameters:
+        - in: query
+          name: findOptions
+          schema:
+            $ref: '#/components/schemas/FindOptions'
+          description: Options for filtering, sorting, and pagination
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Host'
+    post:
+      operationId: createHost
+      summary: Create a new host
+      tags:
+        - host
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Host'
+      responses:
+        '200':
+          description: 添加主机
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+  /api/v1/hosts/{hostId}:
+    get:
+      operationId: getHost
+      summary: Get a host
+      tags:
+        - host
+      parameters:
+        - in: path
+          name: hostId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+    put:
+      operationId: updateHost
+      summary: Update a host
+      tags:
+        - host
+      parameters:
+        - in: path
+          name: hostId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Host'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+    delete:
+      operationId: deleteHost
+      summary: Delete a host
+      tags:
+        - host
+      parameters:
+        - in: path
+          name: hostId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+  /api/v1/hosts/{hostId}/enroll:
+    post:
+      operationId: createEnroll
+      summary: Create an enroll host
+      tags:
+        - host
+      parameters:
+        - in: path
+          name: hostId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  lifetime_seconds:
+                    type: integer
+                    format: int64
+  /api/v1/hosts/{hostId}/enroll-code:
+    post:
+      operationId: createEnrollCode
+      summary: Create an enroll code
+      tags:
+        - host
+      parameters:
+        - in: path
+          name: hostId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEnrollCodeResponse'
+  /api/v1/hosts/{hostId}/enroll-code-check:
+    post:
+      operationId: checkEnrollCode
+      tags:
+        - host
+      parameters:
+        - in: path
+          name: hostId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckEnrollCodeResponse'
+  /api/v1/networks:
+    get:
+      operationId: getAllNetwork
+      summary: List all networks
+      tags:
+        - network
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Host'
+    post:
+      operationId: createNetwork
+      summary: Create a new Network
+      tags:
+        - network
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNetworkRequest'
+      responses:
+        '200':
+          description: 添加主机
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateNetworkResponse'
+  /api/v1/networks/{networkId}:
+    get:
+      operationId: getNetwork
+      summary: Get a network
+      tags:
+        - network
+      parameters:
+        - in: path
+          name: networkId
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+            minLength: 1
+#            pattern: '^\S+$'
+            description: Name of the network
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Network'
+    put:
+      operationId: updateNetwork
+      summary: Update a network
+      tags:
+        - network
+      parameters:
+        - in: path
+          name: networkId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Network'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Network'
+    delete:
+      operationId: deleteNetwork
+      summary: Delete a host
+      tags:
+        - network
+      parameters:
+        - in: path
+          name: networkId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful response
+security:
+  - BearerAuth: [ ]
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Rule:
+      type: object
+      required:
+        - type
+#        - host_id
+        - port
+        - proto
+        - action
+      properties:
+        type:
+          type: string
+          enum:
+            - inbound
+            - outbound
+          default: inbound
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        direction:
+          type: string
+          enum:
+            - inbound
+            - outbound
+          default: inbound
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        id:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        created_at:
+          type: integer
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        name:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        description:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        host_id:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        port:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        proto:
+          type: string
+          enum:
+            - any
+            - tcp
+            - udp
+            - icmp
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        action:
+          type: string
+          enum:
+            - allow
+            - deny
+          default: allow
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        host:
+          type: array
+          items:
+            type: string
+            pattern: '^(\d{1,3}\.){3}\d{1,3}(/(\d{1,2}|[12]\d{2}|3[0-2]))?$'
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+    RuleFindOptions:
+      type: object
+      properties:
+        host_id:
+          type: string
+          description: Host ID
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        page_size:
+          type: integer
+          description: Number of results to return
+          default: 10
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        page_num:
+          type: integer
+          description: Page number
+          default: 1
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+    CheckEnrollCodeResponse:
+      type: object
+      properties:
+        exists:
+          type: boolean
+          description: 如果存在表示还没注册
+    CreateEnrollCodeResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The enroll code
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        lifetime_seconds:
+          type: integer
+          format: int64
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+    FindOptions:
+      type: object
+      properties:
+        filters:
+          type: object
+          description: Filter options
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        sort:
+          type: object
+          description: Sorting options
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        limit:
+          type: integer
+          description: Number of results to return
+          default: 10
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        offset:
+          type: integer
+          description: Offset for pagination
+          default: 0
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        network_id:
+          type: string
+          description: Filter by network ID
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        ip_address:
+          type: string
+          description: Filter by IP address
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        role:
+          type: string
+          description: Filter by role
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        name:
+          type: string
+          description: Filter by name
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        is_lighthouse:
+          type: boolean
+          description: Filter by lighthouse status
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+    Network:
+      type: object
+      properties:
+        id:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: ID of the network
+        name:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: Name of the network
+        cidr:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: CIDR notation of the network address and subnet mask (e.g., "192.168.1.0/24")
+        created_at:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: Creation timestamp
+    CreateNetworkResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: ID of the network
+        name:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: Name of the network
+        cidr:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: CIDR notation of the network address and subnet mask (e.g., "192.168.1.0/24")
+        createdAt:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+      example:
+        name: ExampleNetwork
+        cidr: 192.168.1.0/24
+    CreateNetworkRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          maxLength: 255
+          minLength: 1
+#          pattern: '^\S+$'
+          description: Name of the network
+        cidr:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          pattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$'
+          description: CIDR notation of the network address and subnet mask (e.g., "192.168.1.0/24")
+      required:
+        - cidr
+      example:
+        name: ExampleNetwork
+        cidr: 192.168.1.0/24
+    Host:
+      type: object
+      required:
+        - role
+      properties:
+        online:
+          type: boolean
+          description: Whether the host is online or not
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        id:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: ID of the host
+        name:
+          type: string
+          maxLength: 255
+          minLength: 1
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        ip_address:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        port:
+          type: integer
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        is_lighthouse:
+          type: boolean
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        tags:
+          type: object
+          additionalProperties: true
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        static_addresses:
+          type: array
+          items:
+            type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          description: "A list of static addresses for the host"
+        network_id:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          x-oapi-codegen-extra-tags:
+            binding: required
+        created_at:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        last_seen_at:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+        role:
+          type: string
+          x-omitempty: false
+          x-go-type-skip-optional-pointer: true
+          enum:
+            - none
+            - lighthouse
