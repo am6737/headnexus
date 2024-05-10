@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app"
-	"github.com/am6737/nexus/api/interfaces"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gin-gonic/gin"
 	middleware "github.com/oapi-codegen/gin-middleware"
@@ -19,7 +18,7 @@ import (
 
 var _ v1.ServerInterface = &HttpHandler{}
 
-var _ interfaces.Runnable = &HttpHandler{}
+//var _ interfaces.Runnable = &HttpHandler{}
 
 func NewHttpHandler(app *app.Application) *HttpHandler {
 	return &HttpHandler{
