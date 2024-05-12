@@ -3,11 +3,11 @@ package persistence
 import (
 	"context"
 	"errors"
-	"fmt"
 	ctime "github.com/am6737/headnexus/common/time"
-	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/domain/host/repository"
+	"github.com/am6737/headnexus/infra/persistence/converter"
+	"github.com/am6737/headnexus/infra/persistence/po"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,65 +20,6 @@ var _ repository.HostRepository = &HostMongodbRepository{}
 const (
 	hostCollectionName = "hosts"
 )
-
-type HostDBModel struct {
-	ID              string                 `bson:"_id"`
-	Name            string                 `bson:"name"`
-	NetworkID       string                 `bson:"network_id"`
-	IPAddress       string                 `bson:"ip_address"`
-	Role            string                 `bson:"role"`
-	EnrollCode      string                 `bson:"enroll_code"`
-	Owner           string                 `bson:"owner"`
-	Port            int                    `bson:"port"`
-	IsLighthouse    bool                   `bson:"is_lighthouse"`
-	StaticAddresses []string               `bson:"static_addresses"`
-	Tags            map[string]interface{} `bson:"tags"`
-	CreatedAt       int64                  `bson:"created_at"`
-	UpdatedAt       int64                  `bson:"updated_at"`
-	DeletedAt       int64                  `bson:"deleted_at"`
-	LastSeenAt      int64                  `bson:"last_seen_at"`
-	EnrollAt        int64                  `bson:"enroll_at"`
-	LifetimeSeconds int64                  `bson:"lifetime_seconds"`
-	Status          int8                   `bson:"status"`
-	Config          config.Config          `bson:"Config"`
-}
-
-func (m *HostDBModel) collection() string {
-	return "hosts"
-}
-
-func (m *HostDBModel) From(host *entity.Host) error {
-	m.ID = host.ID
-	m.Name = host.Name
-	m.NetworkID = host.NetworkID
-	m.IPAddress = host.IPAddress
-	m.Role = host.Role
-	m.Port = host.Port
-	m.IsLighthouse = host.IsLighthouse
-	m.StaticAddresses = host.StaticAddresses
-	m.Tags = host.Tags
-	m.Config = host.Config
-	return nil
-}
-
-func (m *HostDBModel) To() (*entity.Host, error) {
-	host := &entity.Host{
-		ID:              m.ID,
-		Name:            m.Name,
-		NetworkID:       m.NetworkID,
-		IPAddress:       m.IPAddress,
-		Role:            m.Role,
-		Port:            m.Port,
-		IsLighthouse:    m.IsLighthouse,
-		StaticAddresses: m.StaticAddresses,
-		LastSeenAt:      m.LastSeenAt,
-		Tags:            m.Tags,
-		Config:          m.Config,
-		Status:          entity.HostStatus(m.Status),
-		//CreatedAt:       m.CreatedAt,
-	}
-	return host, nil
-}
 
 func NewHostMongodbRepository(client *mongo.Client, dbName string) *HostMongodbRepository {
 	db := client.Database(dbName)
@@ -147,9 +88,8 @@ func (h *HostMongodbRepository) HostOffline(ctx context.Context, hostOffline *en
 
 func (h *HostMongodbRepository) GetEnrollHost(ctx context.Context, getEnrollHost *entity.GetEnrollHost) (*entity.EnrollHost, error) {
 	filter := bson.M{"_id": getEnrollHost.HostID}
-	var model HostDBModel
-	err := h.collection.FindOne(ctx, filter).Decode(&model)
-	if err != nil {
+	model := &po.Host{}
+	if err := h.collection.FindOne(ctx, filter).Decode(model); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrorHostNotFound
 		}
@@ -244,12 +184,12 @@ func (h *HostMongodbRepository) Find(ctx context.Context, options *entity.FindOp
 
 	var hosts []*entity.Host
 	for cursor.Next(ctx) {
-		var hostDBModel HostDBModel
-		if err := cursor.Decode(&hostDBModel); err != nil {
+		model := &po.Host{}
+		if err := cursor.Decode(model); err != nil {
 			return nil, err
 		}
 
-		host, err := hostDBModel.To()
+		host, err := converter.HostPOToEntity(model)
 		if err != nil {
 			return nil, err
 		}
@@ -264,17 +204,15 @@ func (h *HostMongodbRepository) Find(ctx context.Context, options *entity.FindOp
 }
 
 func (h *HostMongodbRepository) Create(ctx context.Context, host *entity.Host) (*entity.Host, error) {
-	model := &HostDBModel{}
-	if err := model.From(host); err != nil {
+	model, err := converter.HostEntityToPO(host)
+	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("model cfg => ", model.Config)
 
 	currentTime := ctime.CurrentTimestampMillis()
 	model.CreatedAt = currentTime
 	model.UpdatedAt = currentTime
-	_, err := h.collection.InsertOne(ctx, model)
+	_, err = h.collection.InsertOne(ctx, model)
 	if err != nil {
 		return nil, err
 	}
@@ -283,25 +221,27 @@ func (h *HostMongodbRepository) Create(ctx context.Context, host *entity.Host) (
 
 func (h *HostMongodbRepository) Get(ctx context.Context, id string) (*entity.Host, error) {
 	filter := bson.M{"_id": id}
-	var model HostDBModel
-	err := h.collection.FindOne(ctx, filter).Decode(&model)
-	if err != nil {
+
+	model := &po.Host{}
+
+	if err := h.collection.FindOne(ctx, filter).Decode(&model); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrorHostNotFound
 		}
 		return nil, err
 	}
-	host, err := model.To()
+
+	host, err := converter.HostPOToEntity(model)
 	if err != nil {
 		return nil, err
 	}
+
 	return host, nil
 }
 
 func (h *HostMongodbRepository) Update(ctx context.Context, host *entity.Host) (*entity.Host, error) {
-	// 将 api.Host 转换为 HostDBModel
-	model := &HostDBModel{}
-	if err := model.From(host); err != nil {
+	model, err := converter.HostEntityToPO(host)
+	if err != nil {
 		return nil, err
 	}
 
@@ -311,7 +251,7 @@ func (h *HostMongodbRepository) Update(ctx context.Context, host *entity.Host) (
 
 	// 执行更新操作
 	opts := options.Update().SetUpsert(true)
-	_, err := h.collection.UpdateOne(ctx, filter, update, opts)
+	_, err = h.collection.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
 		return nil, err
 	}

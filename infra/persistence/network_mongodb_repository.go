@@ -7,6 +7,7 @@ import (
 	"fmt"
 	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/network/entity"
+	"github.com/am6737/headnexus/infra/persistence/po"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -17,19 +18,6 @@ import (
 const (
 	networkCollection = "networks"
 )
-
-type NetworkModel struct {
-	ID        string   `bson:"_id,omitempty"`
-	Name      string   `bson:"name"`
-	Cidr      string   `bson:"cidr"`
-	UsedIPs   []string `bson:"used_ips"`
-	Status    uint     `bson:"status"`
-	CreatedAt int64    `bson:"created_at"`
-	UpdatedAt int64    `bson:"updated_at"`
-	DeletedAt int64    `bson:"deleted_at"`
-
-	//AvailableIPs []string `bson:"available_ips"`
-}
 
 type MongoDBRepository struct {
 	client   *mongo.Client
@@ -313,7 +301,7 @@ func (m *MongoDBRepository) Create(ctx context.Context, network *entity.Network)
 	}
 
 	currentTime := ctime.CurrentTimestampMillis()
-	model := &NetworkModel{
+	model := &po.Network{
 		ID:        network.ID,
 		Name:      network.Name,
 		Cidr:      network.Cidr,
@@ -391,15 +379,15 @@ func (m *MongoDBRepository) Find(ctx context.Context, query *entity.QueryNetwork
 
 	var networks []*entity.Network
 	for cursor.Next(ctx) {
-		var network NetworkModel
-		if err := cursor.Decode(&network); err != nil {
+		model := &po.Network{}
+		if err := cursor.Decode(model); err != nil {
 			return nil, err
 		}
 		apiNetwork := &entity.Network{
-			ID:        network.ID,
-			Name:      network.Name,
-			Cidr:      network.Cidr,
-			CreatedAt: network.CreatedAt,
+			ID:        model.ID,
+			Name:      model.Name,
+			Cidr:      model.Cidr,
+			CreatedAt: model.CreatedAt,
 		}
 		networks = append(networks, apiNetwork)
 	}
@@ -441,46 +429,46 @@ func (m *MongoDBRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (m *MongoDBRepository) findNetworkByName(ctx context.Context, name string) (*NetworkModel, error) {
+func (m *MongoDBRepository) findNetworkByName(ctx context.Context, name string) (*po.Network, error) {
 	filter := bson.M{"name": name}
-	var network NetworkModel
-	err := m.networks.FindOne(ctx, filter).Decode(&network)
+	model := &po.Network{}
+	err := m.networks.FindOne(ctx, filter).Decode(model)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &network, nil
+	return model, nil
 }
 
-func (m *MongoDBRepository) findNetworkByCIDR(ctx context.Context, cidr string) (*NetworkModel, error) {
+func (m *MongoDBRepository) findNetworkByCIDR(ctx context.Context, cidr string) (*po.Network, error) {
 	filter := bson.M{"cidr": cidr}
-	var network NetworkModel
-	err := m.networks.FindOne(ctx, filter).Decode(&network)
+	model := &po.Network{}
+	err := m.networks.FindOne(ctx, filter).Decode(model)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &network, nil
+	return model, nil
 }
 
-func (m *MongoDBRepository) getNetworkByID(ctx context.Context, id string) (*NetworkModel, error) {
+func (m *MongoDBRepository) getNetworkByID(ctx context.Context, id string) (*po.Network, error) {
 	filter := bson.M{"_id": id}
-	var network NetworkModel
-	err := m.networks.FindOne(ctx, filter).Decode(&network)
+	model := &po.Network{}
+	err := m.networks.FindOne(ctx, filter).Decode(model)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrorNetworkNotFound
 		}
 		return nil, err
 	}
-	return &network, nil
+	return model, nil
 }
 
-func (m *MongoDBRepository) updateNetwork(ctx context.Context, network *NetworkModel) error {
+func (m *MongoDBRepository) updateNetwork(ctx context.Context, network *po.Network) error {
 	_, err := m.networks.ReplaceOne(ctx, bson.M{"_id": network.ID}, network)
 	if err != nil {
 		return err
@@ -489,7 +477,7 @@ func (m *MongoDBRepository) updateNetwork(ctx context.Context, network *NetworkM
 }
 
 // isIPAllocated checks if the given IP address is allocated in the network.
-func (m *MongoDBRepository) isIPAllocated(network *NetworkModel, ip string) bool {
+func (m *MongoDBRepository) isIPAllocated(network *po.Network, ip string) bool {
 	for _, usedIP := range network.UsedIPs {
 		if usedIP == ip {
 			return true
