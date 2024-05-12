@@ -4,13 +4,14 @@ import (
 	"github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app/network"
 	ctime "github.com/am6737/headnexus/common/time"
+	"github.com/am6737/headnexus/pkg/http"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *HttpHandler) GetAllNetwork(c *gin.Context) {
 	networks, err := h.app.Network.Queries.Handler.Find(c, &network.FindNetwork{})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
@@ -24,13 +25,13 @@ func (h *HttpHandler) GetAllNetwork(c *gin.Context) {
 		})
 	}
 
-	SuccessResponse(c, "查询网络成功", resp)
+	http.SuccessResponse(c, "查询网络成功", resp)
 }
 
 func (h *HttpHandler) CreateNetwork(c *gin.Context) {
 	req := &v1.CreateNetworkRequest{}
 	if err := c.ShouldBindJSON(req); err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
@@ -39,11 +40,11 @@ func (h *HttpHandler) CreateNetwork(c *gin.Context) {
 		Cidr: req.Cidr,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "创建网络成功", &v1.CreateNetworkResponse{
+	http.SuccessResponse(c, "创建网络成功", &v1.CreateNetworkResponse{
 		Cidr: createNetwork.Cidr,
 		Id:   createNetwork.ID,
 		Name: createNetwork.Name,
@@ -57,11 +58,11 @@ func (h *HttpHandler) DeleteNetwork(c *gin.Context, networkId string) {
 		ID: networkId,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "删除网络成功", nil)
+	http.SuccessResponse(c, "删除网络成功", nil)
 }
 
 func (h *HttpHandler) GetNetwork(c *gin.Context, networkId string) {
@@ -72,11 +73,11 @@ func (h *HttpHandler) GetNetwork(c *gin.Context, networkId string) {
 		return
 	}
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "查询网络成功", &v1.Network{
+	http.SuccessResponse(c, "查询网络成功", &v1.Network{
 		Id:        network.ID,
 		Name:      network.Name,
 		Cidr:      network.Cidr,
@@ -87,7 +88,7 @@ func (h *HttpHandler) GetNetwork(c *gin.Context, networkId string) {
 func (h *HttpHandler) UpdateNetwork(c *gin.Context, networkId string) {
 	req := &v1.Network{}
 	if err := c.ShouldBindJSON(req); err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
@@ -97,11 +98,11 @@ func (h *HttpHandler) UpdateNetwork(c *gin.Context, networkId string) {
 		Name: req.Name,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "更新网络成功", &v1.Network{
+	http.SuccessResponse(c, "更新网络成功", &v1.Network{
 		Cidr: updateNetwork.Cidr,
 		Id:   updateNetwork.ID,
 		Name: updateNetwork.Name,

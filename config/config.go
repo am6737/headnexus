@@ -17,6 +17,8 @@ type Config struct {
 	Outbound      []OutboundRule      `yaml:"outbound"`
 	Inbound       []InboundRule       `yaml:"inbound"`
 	Persistence   Persistence         `yaml:"persistence"`
+	JwtConfig     JwtConfig           `yaml:"jwt"`
+	Email         EmailConfig         `yaml:"email"`
 }
 
 type LighthouseConfig struct {
@@ -51,6 +53,19 @@ type TunConfig struct {
 	DropMulticast      bool   `yaml:"drop_multicast"`
 	TxQueue            int    `yaml:"tx_queue"`
 	MTU                int    `yaml:"mtu"`
+}
+
+type EmailConfig struct {
+	Enable   bool   `yaml:"enable"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+
+type JwtConfig struct {
+	Secret string
+	Expiry time.Duration
 }
 
 // HandshakeConfig 握手配置

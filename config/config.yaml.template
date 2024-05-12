@@ -1,0 +1,54 @@
+static_host_map: {}
+lighthouse:
+  enabled: true
+  interval: 60
+  hosts: []
+  local_allow_list:
+    ports: {}
+listen:
+  host: "0.0.0.0"
+  port: 7777
+  batch: 64
+  read_buffer: 10485760
+  write_buffer: 10485760
+  routines: 1
+tun:
+  disabled: false
+  dev: "nexus1"
+  ip: ""
+  mask: ""
+  drop_local_broadcast: false
+  drop_multicast: false
+  tx_queue: 500
+  mtu: 1300
+handshake:
+  handshake_host: 30s
+  sync_lighthouse: 1m
+  try_interval: 10s
+  retries: 3
+  trigger_buffer: 10
+  use_relays: false
+outbound:
+  - port: 0
+    proto: "icmp"
+    host: []
+    action: "allow"
+inbound:
+  - port: 0
+    proto: "icmp"
+    host: []
+    action: "allow"
+persistence:
+  enabled: true
+  url: "mongodb://root:123456@localhost:27017/?authSource=nexus"
+  type: "mongodb"
+  db: "nexus"
+jwt:
+  secret: "123456"
+  expire: 86400
+email:
+  enabled: false
+  host: ""
+  port: 465
+  username: ""
+  password: ""

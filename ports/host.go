@@ -4,13 +4,14 @@ import (
 	"fmt"
 	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app/host"
+	"github.com/am6737/headnexus/pkg/http"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *HttpHandler) CreateEnroll(c *gin.Context, hostId string) {
 	req := &v1.CreateEnrollJSONRequestBody{}
 	if err := c.ShouldBindJSON(req); err != nil {
-		FailedResponse(c, "参数错误")
+		http.FailedResponse(c, "参数错误")
 		return
 	}
 
@@ -20,17 +21,17 @@ func (h *HttpHandler) CreateEnroll(c *gin.Context, hostId string) {
 		//UserID:     "",
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "success", enrollHost)
+	http.SuccessResponse(c, "success", enrollHost)
 }
 
 func (h *HttpHandler) CheckEnrollCode(c *gin.Context, hostId string) {
 	req := &v1.CheckEnrollCodeJSONRequestBody{}
 	if err := c.ShouldBindJSON(req); err != nil {
-		FailedResponse(c, "参数错误")
+		http.FailedResponse(c, "参数错误")
 		return
 	}
 
@@ -40,11 +41,11 @@ func (h *HttpHandler) CheckEnrollCode(c *gin.Context, hostId string) {
 		//UserID: "",
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "success", &v1.CheckEnrollCodeResponse{
+	http.SuccessResponse(c, "success", &v1.CheckEnrollCodeResponse{
 		Exists: &check.Exists,
 	})
 }
@@ -55,11 +56,11 @@ func (h *HttpHandler) CreateEnrollCode(c *gin.Context, hostId string) {
 		//UserID: c.GetString("user_id"),
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "success", &v1.CreateEnrollCodeResponse{
+	http.SuccessResponse(c, "success", &v1.CreateEnrollCodeResponse{
 		Code:            code.Code,
 		LifetimeSeconds: code.LifetimeSeconds,
 	})
@@ -67,7 +68,7 @@ func (h *HttpHandler) CreateEnrollCode(c *gin.Context, hostId string) {
 
 func (h *HttpHandler) ListHost(c *gin.Context, params v1.ListHostParams) {
 	if params.FindOptions == nil {
-		FailedResponse(c, "参数错误")
+		http.FailedResponse(c, "参数错误")
 		return
 	}
 	//fmt.Println("params => ", params.FindOptions.IsLighthouse)
@@ -84,7 +85,7 @@ func (h *HttpHandler) ListHost(c *gin.Context, params v1.ListHostParams) {
 		IsLighthouse: params.FindOptions.IsLighthouse,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
@@ -93,14 +94,14 @@ func (h *HttpHandler) ListHost(c *gin.Context, params v1.ListHostParams) {
 		resp = append(resp, convertApiNetworkToHost(host))
 	}
 
-	SuccessResponse(c, "获取所有主机列表", resp)
+	http.SuccessResponse(c, "获取所有主机列表", resp)
 }
 
 func (h *HttpHandler) CreateHost(c *gin.Context) {
 	req := &v1.Host{}
 	if err := c.ShouldBindJSON(req); err != nil {
 		fmt.Printf("create host error: %v", err)
-		FailedResponse(c, "参数错误")
+		http.FailedResponse(c, "参数错误")
 		return
 	}
 
@@ -115,11 +116,11 @@ func (h *HttpHandler) CreateHost(c *gin.Context) {
 		Tags:            req.Tags,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "创建主机成功", convertApiNetworkToHost(host))
+	http.SuccessResponse(c, "创建主机成功", convertApiNetworkToHost(host))
 }
 
 func (h *HttpHandler) DeleteHost(c *gin.Context, hostId string) {
@@ -129,10 +130,10 @@ func (h *HttpHandler) DeleteHost(c *gin.Context, hostId string) {
 		ID:     hostId,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
-	SuccessResponse(c, "删除主机成功", nil)
+	http.SuccessResponse(c, "删除主机成功", nil)
 }
 
 func (h *HttpHandler) GetHost(c *gin.Context, hostId string) {
@@ -142,10 +143,10 @@ func (h *HttpHandler) GetHost(c *gin.Context, hostId string) {
 		UserID: "",
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
-	SuccessResponse(c, "获取主机信息成功", convertApiNetworkToHost(host))
+	http.SuccessResponse(c, "获取主机信息成功", convertApiNetworkToHost(host))
 }
 
 func convertApiNetworkToHost(h *host.Host) *v1.Host {
@@ -168,7 +169,7 @@ func convertApiNetworkToHost(h *host.Host) *v1.Host {
 func (h *HttpHandler) UpdateHost(c *gin.Context, hostId string) {
 	req := &v1.Host{}
 	if err := c.ShouldBindJSON(req); err != nil {
-		FailedResponse(c, "参数错误")
+		http.FailedResponse(c, "参数错误")
 		return
 	}
 
@@ -187,10 +188,10 @@ func (h *HttpHandler) UpdateHost(c *gin.Context, hostId string) {
 		return
 	}
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
-	SuccessResponse(c, "更新主机成功", updatedHost)
+	http.SuccessResponse(c, "更新主机成功", updatedHost)
 }
 
 func convertMapToStringMap(inputMap map[string]interface{}) map[string]string {
