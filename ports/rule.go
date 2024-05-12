@@ -4,6 +4,7 @@ import (
 	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app/rule"
 	"github.com/am6737/headnexus/domain/rule/entity"
+	"github.com/am6737/headnexus/pkg/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,11 +14,11 @@ func (h *HttpHandler) DeleteRule(c *gin.Context, id string) {
 		ID: id,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "删除规则成功", nil)
+	http.SuccessResponse(c, "删除规则成功", nil)
 }
 
 func (h *HttpHandler) ListRule(c *gin.Context, params v1.ListRuleParams) {
@@ -32,7 +33,7 @@ func (h *HttpHandler) ListRule(c *gin.Context, params v1.ListRuleParams) {
 		PageNum:  params.RuleFindOptions.PageNum,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
@@ -41,13 +42,13 @@ func (h *HttpHandler) ListRule(c *gin.Context, params v1.ListRuleParams) {
 		listRuleResponse = append(listRuleResponse, convertRuleToResponse(v))
 	}
 
-	SuccessResponse(c, "查询成功", listRuleResponse)
+	http.SuccessResponse(c, "查询成功", listRuleResponse)
 }
 
 func (h *HttpHandler) CreateRule(c *gin.Context) {
 	req := &v1.Rule{}
 	if err := c.ShouldBindJSON(req); err != nil {
-		FailedResponse(c, "参数错误")
+		http.FailedResponse(c, "参数错误")
 		return
 	}
 
@@ -62,11 +63,11 @@ func (h *HttpHandler) CreateRule(c *gin.Context) {
 		Host:        req.Host,
 	})
 	if err != nil {
-		FailedResponse(c, err.Error())
+		http.FailedResponse(c, err.Error())
 		return
 	}
 
-	SuccessResponse(c, "创建成功", convertRuleToResponse(createRule))
+	http.SuccessResponse(c, "创建成功", convertRuleToResponse(createRule))
 }
 
 func convertRuleToResponse(e *entity.Rule) *v1.Rule {

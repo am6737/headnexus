@@ -20,9 +20,20 @@ func main() {
 		FullTimestamp:   true,
 	})
 
-	cfg := config.GenerateConfigTemplate()
+	// 从环境变量中获取配置文件路径
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		logger.Fatal("未指定配置文件路径，请设置 CONFIG_PATH 环境变量")
+	}
 
-	app := service.NewApplication(ctx, &cfg, logger)
+	// 加载配置文件
+	cfg, err := config.Load(configPath)
+	if err != nil {
+		logger.Fatal("无法加载配置文件：", err)
+	}
+	//cfg := config.GenerateConfigTemplate()
+
+	app := service.NewApplication(ctx, cfg, logger)
 
 	httpSrv := ports.NewHttpHandler(app)
 
