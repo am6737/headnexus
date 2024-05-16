@@ -53,6 +53,7 @@ func NewApplication(ctx context.Context, cfg *config.Config, logger *logrus.Logg
 	rq := ruleQuery.NewRuleHandler(ruleRepo, logger)
 
 	userRepo := persistence.NewUserMongodbRepository(mongodbConn, cfg.Persistence.DB)
+
 	uc := userCommand.NewUserHandler(userRepo, logger, jwtc, emailClient)
 	uq := userQuery.NewUserHandler(userRepo, logger)
 

@@ -36,7 +36,7 @@ func (h *UserHandler) Register(ctx context.Context, cmd *user.CreateUser) (*enti
 	code := pkgstring.GenerateRandomCode()
 	verification, err := pkgjwt.GenerateTokenWithExpiryAndKey(jwt.MapClaims{
 		"user_id": create.ID,
-	}, 30*time.Second, []byte(code))
+	}, 30*time.Minute, []byte(code))
 	if err != nil {
 		return nil, err
 	}

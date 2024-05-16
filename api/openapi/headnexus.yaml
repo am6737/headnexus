@@ -391,6 +391,25 @@ paths:
       responses:
         '204':
           description: Successful response
+  /api/v1/user/send-code:
+    post:
+      summary: 发送验证码
+      operationId: sendCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '204':
+          description: Successful response
 components:
   securitySchemes:
     BearerAuth:
@@ -734,10 +753,10 @@ components:
     ChangePasswordRequest:
       type: object
       properties:
-        oldPassword:
+        old_password:
           type: string
           example: old_password123
-        newPassword:
+        new_password:
           type: string
           format: password
           example: new_password123

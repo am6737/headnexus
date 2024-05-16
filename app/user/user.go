@@ -51,6 +51,8 @@ type CommandHandler interface {
 	Update(ctx context.Context, cmd *UpdateUser) (*entity.User, error)
 	Register(ctx context.Context, cmd *CreateUser) (*entity.User, error)
 	Login(ctx context.Context, email string, password string) (string, error)
+	Verify(ctx context.Context, email, code string) error
+	SendCode(ctx context.Context, email string) error
 }
 
 type QueryHandler interface {
