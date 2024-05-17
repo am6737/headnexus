@@ -25,8 +25,11 @@ type UserHandler struct {
 }
 
 func (h *UserHandler) Get(ctx context.Context, query *user.GetUser) (*entity.User, error) {
-	//TODO implement me
-	panic("implement me")
+	get, err := h.repo.Get(ctx, query.ID)
+	if err != nil {
+		return nil, err
+	}
+	return get, nil
 }
 
 func (h *UserHandler) Find(ctx context.Context, query *user.FindUser) ([]*entity.User, error) {

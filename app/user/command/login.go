@@ -21,7 +21,7 @@ func (h *UserHandler) Login(ctx context.Context, email string, password string) 
 	u1 := u[0]
 
 	if pkgstring.Md5(password) != u1.Password {
-		return "", err
+		return "", errors.New("用户不存在或密码错误")
 	}
 
 	if u1.Status != entity.Normal {

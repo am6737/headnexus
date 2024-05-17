@@ -64,8 +64,8 @@ type EmailConfig struct {
 }
 
 type JwtConfig struct {
-	Secret string
-	Expiry time.Duration
+	Secret string        `yaml:"secret"`
+	Expiry time.Duration `yaml:"expire"`
 }
 
 // HandshakeConfig 握手配置

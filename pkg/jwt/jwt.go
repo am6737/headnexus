@@ -13,6 +13,9 @@ type JWTConfig struct {
 
 func (c *JWTConfig) GenerateToken(claims jwt.Claims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	fmt.Println("过期时间", c.ExpiryDuration)
+	fmt.Println("过期时间", time.Now().Add(c.ExpiryDuration))
 	token.Claims.(jwt.MapClaims)["exp"] = time.Now().Add(c.ExpiryDuration).Unix()
 
 	signedToken, err := token.SignedString([]byte(c.SecretKey))
