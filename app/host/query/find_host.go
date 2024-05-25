@@ -7,7 +7,7 @@ import (
 )
 
 func (h *HostHandler) Find(ctx context.Context, query *host.FindHost) ([]*host.Host, error) {
-	find, err := h.repo.Find(ctx, &entity.FindOptions{
+	find, err := h.repo.Find(ctx, &entity.HostFindOptions{
 		Filters:      query.Filters,
 		Sort:         query.Sort,
 		Limit:        query.Limit,

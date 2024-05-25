@@ -9,11 +9,13 @@ import (
 
 var _ host.QueryHandler = &HostHandler{}
 
-func NewHostHandler(repo repository.HostRepository, logger *logrus.Logger, nch network.CommandHandler) *HostHandler {
+func NewHostHandler(repo repository.HostRepository, hostRuleRepo repository.HostRuleRepository, ruleRepo repository.RuleRepository, logger *logrus.Logger, nch network.CommandHandler) *HostHandler {
 	return &HostHandler{
-		repo:   repo,
-		logger: logger,
-		nch:    nch,
+		repo:         repo,
+		ruleRepo:     ruleRepo,
+		hostRuleRepo: hostRuleRepo,
+		logger:       logger,
+		nch:          nch,
 	}
 }
 
@@ -22,4 +24,7 @@ type HostHandler struct {
 
 	nch  network.CommandHandler
 	repo repository.HostRepository
+
+	ruleRepo     repository.RuleRepository
+	hostRuleRepo repository.HostRuleRepository
 }

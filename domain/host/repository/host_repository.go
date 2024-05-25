@@ -11,7 +11,7 @@ type HostRepository interface {
 	Get(ctx context.Context, id string) (*entity.Host, error)
 	Update(ctx context.Context, host *entity.Host) (*entity.Host, error)
 	Delete(ctx context.Context, id string) error
-	Find(ctx context.Context, options *entity.FindOptions) ([]*entity.Host, error)
+	Find(ctx context.Context, options *entity.HostFindOptions) ([]*entity.Host, error)
 
 	// GetEnrollHost 获取主机的注册信息
 	GetEnrollHost(ctx context.Context, getEnrollHost *entity.GetEnrollHost) (*entity.EnrollHost, error)

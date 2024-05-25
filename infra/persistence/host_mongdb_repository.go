@@ -9,6 +9,7 @@ import (
 	"github.com/am6737/headnexus/infra/persistence/converter"
 	"github.com/am6737/headnexus/infra/persistence/po"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -17,25 +18,98 @@ var ErrorHostNotFound = errors.New("host not found")
 
 var _ repository.HostRepository = &HostMongodbRepository{}
 
+var _ repository.HostRuleRepository = &HostMongodbRepository{}
+
 const (
-	hostCollectionName = "hosts"
+	hostCollectionName     = "hosts"
+	hostRuleCollectionName = "host_rules"
 )
 
 func NewHostMongodbRepository(client *mongo.Client, dbName string) *HostMongodbRepository {
 	db := client.Database(dbName)
 	collection := db.Collection(hostCollectionName)
+	hostRuleCollection := db.Collection(hostRuleCollectionName)
 	m := &HostMongodbRepository{
-		client:     client,
-		db:         db,
-		collection: collection,
+		client:             client,
+		db:                 db,
+		collection:         collection,
+		hostRuleCollection: hostRuleCollection,
 	}
 	return m
 }
 
 type HostMongodbRepository struct {
-	client     *mongo.Client
-	db         *mongo.Database
-	collection *mongo.Collection
+	client             *mongo.Client
+	db                 *mongo.Database
+	collection         *mongo.Collection
+	hostRuleCollection *mongo.Collection
+}
+
+func (h *HostMongodbRepository) AddHostRule(ctx context.Context, hostID string, ruleIDs ...string) error {
+	var hostRules []interface{}
+	for _, ruleID := range ruleIDs {
+		hostRule := po.HostRuleRelation{
+			ID:     primitive.NewObjectID().Hex(),
+			HostID: hostID,
+			RuleID: ruleID,
+		}
+
+		currentTime := ctime.CurrentTimestampMillis()
+		hostRule.CreatedAt = currentTime
+		hostRule.UpdatedAt = currentTime
+
+		hostRules = append(hostRules, hostRule)
+	}
+
+	// 批量插入关联文档
+	_, err := h.hostRuleCollection.InsertMany(ctx, hostRules)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h *HostMongodbRepository) ListHostRule(ctx context.Context, opts *entity.ListHostRuleOptions) ([]*entity.HostRuleRelation, error) {
+	if opts == nil || opts.HostID == "" {
+		return nil, errors.New("hostID is required")
+	}
+
+	filter := bson.M{"host_id": opts.HostID}
+
+	// 添加其他过滤条件
+	if opts.Type != nil {
+		filter["type"] = opts.Type
+	}
+	if opts.Proto != nil {
+		filter["proto"] = opts.Proto
+	}
+	if opts.Action != nil {
+		filter["action"] = opts.Action
+	}
+
+	cursor, err := h.hostRuleCollection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var rules []*entity.HostRuleRelation
+	for cursor.Next(ctx) {
+		model := &po.HostRuleRelation{}
+		if err := cursor.Decode(model); err != nil {
+			return nil, err
+		}
+
+		rule := converter.HostRulePOToEntity(model)
+		rules = append(rules, rule)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return rules, nil
 }
 
 func (h *HostMongodbRepository) HostOnline(ctx context.Context, hostOnline *entity.HostOnline) (*entity.HostOnline, error) {
@@ -96,10 +170,11 @@ func (h *HostMongodbRepository) GetEnrollHost(ctx context.Context, getEnrollHost
 		return nil, err
 	}
 	return &entity.EnrollHost{
-		HostID:          model.ID,
-		Code:            model.EnrollCode,
-		LifetimeSeconds: model.LifetimeSeconds,
-		EnrollAt:        model.EnrollAt,
+		HostID:              model.ID,
+		Code:                model.EnrollCode,
+		EnrollAt:            model.EnrollAt,
+		CreatedAt:           model.CreatedAt,
+		EnrollCodeExpiredAt: model.EnrollCodeExpiredAt,
 	}, nil
 }
 
@@ -108,9 +183,9 @@ func (h *HostMongodbRepository) EnrollHost(ctx context.Context, enrollHost *enti
 
 	update := bson.M{
 		"$set": bson.M{
-			"enroll_code":      enrollHost.Code,
-			"lifetime_seconds": enrollHost.LifetimeSeconds,
-			"enroll_at":        enrollHost.EnrollAt,
+			"enroll_code":            enrollHost.Code,
+			"enroll_code_expired_at": enrollHost.EnrollCodeExpiredAt,
+			"enroll_at":              enrollHost.EnrollAt,
 		},
 	}
 
@@ -123,7 +198,7 @@ func (h *HostMongodbRepository) EnrollHost(ctx context.Context, enrollHost *enti
 	return nil
 }
 
-func ToFindOptions(listOptions *entity.FindOptions) *options.FindOptions {
+func ToFindOptions(listOptions *entity.HostFindOptions) *options.FindOptions {
 	findOptions := options.FindOptions{}
 
 	// Translate FindOptions.Sort into FindOptions.Sort
@@ -160,7 +235,7 @@ type FindOptions struct {
 	Offset  int
 }
 
-func (h *HostMongodbRepository) Find(ctx context.Context, options *entity.FindOptions) ([]*entity.Host, error) {
+func (h *HostMongodbRepository) Find(ctx context.Context, options *entity.HostFindOptions) ([]*entity.Host, error) {
 	filter := bson.M{}
 	if options.NetworkID != "" {
 		filter["network_id"] = options.NetworkID

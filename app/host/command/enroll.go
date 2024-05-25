@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/am6737/headnexus/app/host"
 	"github.com/am6737/headnexus/common/code"
 	ctime "github.com/am6737/headnexus/common/time"
@@ -30,9 +31,9 @@ func (h *HostHandler) GenerateEnrollCode(ctx context.Context, cmd *host.Generate
 	ecode := code.GenEnrollCode()
 
 	if err := h.repo.EnrollHost(ctx, &entity.EnrollHost{
-		HostID:          cmd.HostID,
-		Code:            ecode,
-		LifetimeSeconds: lifetimeSeconds,
+		HostID:              cmd.HostID,
+		Code:                ecode,
+		EnrollCodeExpiredAt: ctime.CurrentTimestampMillis() + lifetimeSeconds,
 	}); err != nil {
 		h.logger.Errorf("failed to enroll host: %v", err)
 		return nil, err
@@ -73,7 +74,10 @@ func (h *HostHandler) EnrollHost(ctx context.Context, cmd *host.EnrollHost) (*ho
 		return nil, errors.New("host already enrolled")
 	}
 
-	if r.LifetimeSeconds > 0 && r.EnrollAt+r.LifetimeSeconds < ctime.CurrentTimestampMillis() {
+	fmt.Println("EnrollCodeExpiredAt => ", ctime.FormatTimestamp(r.EnrollCodeExpiredAt))
+	fmt.Println("ctime.CurrentTimestampMillis() => ", ctime.FormatTimestamp(ctime.CurrentTimestampMillis()))
+
+	if r.EnrollCodeExpiredAt < ctime.CurrentTimestampMillis() {
 		return nil, errors.New("host enroll code expired")
 	}
 
@@ -81,10 +85,9 @@ func (h *HostHandler) EnrollHost(ctx context.Context, cmd *host.EnrollHost) (*ho
 	enrollAt := ctime.CurrentTimestampMillis()
 
 	if err := h.repo.EnrollHost(ctx, &entity.EnrollHost{
-		HostID:          cmd.HostID,
-		Code:            ecode,
-		LifetimeSeconds: lifetimeSeconds,
-		EnrollAt:        enrollAt,
+		HostID:   cmd.HostID,
+		Code:     ecode,
+		EnrollAt: enrollAt,
 	}); err != nil {
 		h.logger.Errorf("failed to enroll host: %v", err)
 		return nil, err

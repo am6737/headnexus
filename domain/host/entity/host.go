@@ -1,6 +1,8 @@
 package entity
 
-import "github.com/am6737/headnexus/config"
+import (
+	"github.com/am6737/headnexus/config"
+)
 
 // Host 表示一个主机
 type Host struct {
@@ -65,14 +67,15 @@ type HostOffline struct {
 }
 
 type EnrollHost struct {
-	HostID          string
-	Code            string
-	LifetimeSeconds int64
-	EnrollAt        int64
+	HostID              string
+	Code                string
+	EnrollCodeExpiredAt int64
+	EnrollAt            int64
+	CreatedAt           int64
 }
 
-// FindOptions 定义了查询主机数据时的过滤和排序选项
-type FindOptions struct {
+// HostFindOptions 定义了查询主机数据时的过滤和排序选项
+type HostFindOptions struct {
 	// 可以添加各种过滤条件,如按名称、IP、标签等进行过滤
 	Filters map[string]interface{}
 
@@ -88,4 +91,14 @@ type FindOptions struct {
 	Role         string
 	Name         string
 	IsLighthouse bool
+}
+
+type ListHostRuleOptions struct {
+	HostID   string
+	Port     string
+	Type     *RuleType
+	Proto    *RuleProto
+	Action   *RuleAction
+	PageSize int
+	PageNum  int
 }

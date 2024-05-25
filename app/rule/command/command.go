@@ -2,7 +2,7 @@ package command
 
 import (
 	"github.com/am6737/headnexus/app/rule"
-	"github.com/am6737/headnexus/domain/rule/repository"
+	"github.com/am6737/headnexus/domain/host/repository"
 	"github.com/sirupsen/logrus"
 )
 

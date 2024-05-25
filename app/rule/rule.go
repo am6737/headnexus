@@ -3,7 +3,7 @@ package rule
 import (
 	"context"
 	"encoding/json"
-	"github.com/am6737/headnexus/domain/rule/entity"
+	"github.com/am6737/headnexus/domain/host/entity"
 )
 
 type Application struct {
@@ -61,6 +61,7 @@ type FindRule struct {
 	HostID   string
 	PageSize int
 	PageNum  int
+	UserID   string
 }
 
 func (fr FindRule) String() string {

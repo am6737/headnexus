@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/am6737/headnexus/app/rule"
-	"github.com/am6737/headnexus/domain/rule/entity"
-	"github.com/am6737/headnexus/domain/rule/repository"
+	"github.com/am6737/headnexus/domain/host/entity"
+	"github.com/am6737/headnexus/domain/host/repository"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,7 +35,7 @@ func (h *RuleHandler) Find(ctx context.Context, query *rule.FindRule) ([]*entity
 		return nil, errors.New("query is nil")
 	}
 
-	find, err := h.repo.Find(ctx, &entity.FindOptions{
+	find, err := h.repo.Find(ctx, query.UserID, &entity.RuleFindOptions{
 		Name:     query.Name,
 		HostID:   query.HostID,
 		PageSize: query.PageSize,

@@ -6,6 +6,7 @@ type Rule struct {
 	Type        RuleType
 	CreatedAt   int64
 	ID          string
+	UserID      string
 	Name        string
 	Description string
 	HostID      string
@@ -133,7 +134,7 @@ type UpdateRule struct {
 	Host        []string
 }
 
-type FindOptions struct {
+type RuleFindOptions struct {
 	Name     string
 	HostID   string
 	PageSize int

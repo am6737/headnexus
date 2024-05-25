@@ -21,6 +21,7 @@ func UserEntityToPO(e *entity.User) (*po.User, error) {
 	m.Status = uint(e.Status)
 	m.Verification = e.Verification
 	m.Password = e.Password
+	m.LastLoginAt = e.LastLoginAt
 	return m, nil
 }
 
@@ -33,5 +34,6 @@ func UserPOToEntity(po *po.User) (*entity.User, error) {
 		Password:     po.Password,
 		Status:       entity.UserStatus(po.Status),
 		Verification: po.Verification,
+		LastLoginAt:  po.LastLoginAt,
 	}, nil
 }

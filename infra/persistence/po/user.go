@@ -11,4 +11,5 @@ type User struct {
 	CreatedAt    int64  `bson:"created_at"`
 	UpdatedAt    int64  `bson:"updated_at"`
 	DeletedAt    int64  `bson:"deleted_at"`
+	LastLoginAt  int64  `bson:"last_login_at"`
 }

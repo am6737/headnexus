@@ -9,6 +9,7 @@ type User struct {
 	Status       UserStatus
 	Password     string
 	CreatedAt    int64
+	LastLoginAt  int64
 }
 
 // 去除敏感信息

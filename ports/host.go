@@ -4,9 +4,52 @@ import (
 	"fmt"
 	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app/host"
+	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/pkg/http"
 	"github.com/gin-gonic/gin"
 )
+
+func (h *HttpHandler) ListHostRules(c *gin.Context, hostId string, params v1.ListHostRulesParams) {
+	rules, err := h.app.Host.Queries.Handler.ListHostRules(c, &host.ListHostRules{
+		UserID:   c.Value("user_id").(string),
+		HostID:   hostId,
+		PageSize: *params.PageSize,
+		PageNum:  *params.PageNum,
+	})
+	if err != nil {
+		http.FailedResponse(c, err.Error())
+		return
+	}
+
+	http.SuccessResponse(c, "success", listHostRulesToResponse(rules))
+}
+
+func listHostRulesToResponse(rules []*entity.Rule) []*v1.Rule {
+	var res []*v1.Rule
+	for _, rule := range rules {
+		res = append(res, convertRuleToResponse(rule))
+	}
+	return res
+}
+
+func (h *HttpHandler) AddHostRule(c *gin.Context, hostId string) {
+	req := &v1.AddHostRuleJSONRequestBody{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		http.FailedResponse(c, "参数错误")
+		return
+	}
+	addHostRule, err := h.app.Host.Commands.Handler.AddHostRule(c, &host.AddHostRule{
+		UserID: c.GetString("user_id"),
+		HostID: hostId,
+		Rules:  req.Rules,
+	})
+	if err != nil {
+		http.FailedResponse(c, err.Error())
+		return
+	}
+
+	http.SuccessResponse(c, "添加主机规则成功", listHostRulesToResponse(addHostRule))
+}
 
 func (h *HttpHandler) CreateEnroll(c *gin.Context, hostId string) {
 	req := &v1.CreateEnrollJSONRequestBody{}
@@ -98,7 +141,7 @@ func (h *HttpHandler) ListHost(c *gin.Context, params v1.ListHostParams) {
 }
 
 func (h *HttpHandler) CreateHost(c *gin.Context) {
-	req := &v1.Host{}
+	req := &v1.CreateHostJSONRequestBody{}
 	if err := c.ShouldBindJSON(req); err != nil {
 		fmt.Printf("create host error: %v", err)
 		http.FailedResponse(c, "参数错误")
@@ -106,14 +149,15 @@ func (h *HttpHandler) CreateHost(c *gin.Context) {
 	}
 
 	host, err := h.app.Host.Commands.Handler.Create(c, &host.CreateHost{
-		Name:            req.Name,
-		NetworkID:       req.NetworkId,
-		IPAddress:       req.IpAddress,
-		Role:            string(req.Role),
-		Port:            req.Port,
+		Name:      req.Name,
+		NetworkID: req.NetworkId,
+		IPAddress: req.IpAddress,
+		Role:      req.Role,
+		//Port:            req.Port,
 		IsLighthouse:    req.IsLighthouse,
 		StaticAddresses: req.StaticAddresses,
-		Tags:            req.Tags,
+		Rules:           req.Rules,
+		//Tags:            req.Tags,
 	})
 	if err != nil {
 		http.FailedResponse(c, err.Error())

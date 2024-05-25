@@ -29,7 +29,7 @@ func (h *UserHandler) Get(ctx context.Context, query *user.GetUser) (*entity.Use
 	if err != nil {
 		return nil, err
 	}
-	return get, nil
+	return get.Info(), nil
 }
 
 func (h *UserHandler) Find(ctx context.Context, query *user.FindUser) ([]*entity.User, error) {
