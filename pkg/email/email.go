@@ -1,6 +1,7 @@
 package email
 
 import (
+	"fmt"
 	"github.com/wneessen/go-mail"
 	"log"
 )
@@ -32,8 +33,9 @@ func (s *EmailClient) SendEmail(to, subject, body string) error {
 		return err
 	}
 	m.Subject(subject)
-	m.SetBodyString(mail.TypeTextHTML, body)
+	m.SetBodyString(mail.TypeTextPlain, body)
 
+	fmt.Println("发送邮件", s.thisEmail)
 	if err := s.c.DialAndSend(m); err != nil {
 		return err
 	}

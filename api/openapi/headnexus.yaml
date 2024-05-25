@@ -364,23 +364,15 @@ paths:
         '204':
           description: Successful response
   /api/v1/user/verify-code:
-    get:
+    post:
       summary: Verify verification code
       operationId: verifyCode
-      parameters:
-        - name: email
-          in: query
-          description: User email address
-          required: true
-          schema:
-            type: string
-            format: email
-        - name: code
-          in: query
-          description: Verification code
-          required: true
-          schema:
-            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCodeRequest'
       responses:
         '204':
           description: Successful response
@@ -401,14 +393,20 @@ paths:
           description: Successful response
   /api/v1/user/send-code:
     post:
-      summary: 发送激活邮件
+      summary: 发送验证码
       operationId: sendCode
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendCodeRequest'
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
       responses:
         '204':
           description: Successful response
@@ -717,13 +715,16 @@ components:
           enum:
             - none
             - lighthouse
-    SendCodeRequest:
+    VerifyCodeRequest:
       type: object
       properties:
         email:
           type: string
           format: email
           example: 123@qq.com
+        code:
+          type: string
+          example: 123456
     LoginRequest:
       type: object
       properties:

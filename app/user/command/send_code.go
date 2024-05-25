@@ -35,22 +35,9 @@ func (h *UserHandler) SendCode(ctx context.Context, email string) error {
 		return err
 	}
 
-	//todo 优化激活邮件链接的前缀
-	if err := h.emailClient.SendEmail(email, "激活账号", getEmailTemplate(fmt.Sprintf("%s://%s:%d", "http", h.listen.Host, h.listen.Port), email, code)); err != nil {
+	if err := h.emailClient.SendEmail(email, "验证码", code); err != nil {
 		fmt.Println("4", err)
 		return err
 	}
 	return nil
-}
-
-func getEmailTemplate(host, email, code string) string {
-	return fmt.Sprintf(`
-   <p>感谢您注册我们的服务。请点击下面的链接激活您的账号：</p>
-   <a href="%s/api/v1/user/verify-code?email=%s&code=%s" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; border-radius: 5px; text-decoration: none;">激活账号</a>
-   <p>如果链接无法点击，请复制并粘贴以下链接到您的浏览器地址栏：</p>
-   <p>%s/api/v1/user/verify-code?email=%s&code=%s</p>
-   <p>如果您没有尝试注册，请忽略此邮件。</p>
-   <p>感谢您的配合。</p>
-   <p>祝好</p>
-`, host, email, code, host, email, code)
 }

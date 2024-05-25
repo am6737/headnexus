@@ -6,7 +6,7 @@ lighthouse:
   local_allow_list:
     ports: {}
 listen:
-  host: "127.0.0.1"
+  host: "0.0.0.0"
   port: 7777
   batch: 64
   read_buffer: 10485760

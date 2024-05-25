@@ -2,23 +2,12 @@ package main
 
 import (
 	"context"
-	"flag"
 	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/ports"
 	"github.com/am6737/headnexus/service"
 	"github.com/sirupsen/logrus"
 	"os"
 )
-
-var configPath string
-
-func init() {
-	configPath = os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		flag.StringVar(&configPath, "config", "config.yaml", "配置文件路径")
-		flag.Parse()
-	}
-}
 
 func main() {
 	ctx := context.Background()
@@ -32,8 +21,9 @@ func main() {
 	})
 
 	// 从环境变量中获取配置文件路径
+	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
-		logger.Fatal("未指定配置文件路径，请设置 CONFIG_PATH 环境变量或添加启动参数 --config")
+		logger.Fatal("未指定配置文件路径，请设置 CONFIG_PATH 环境变量")
 	}
 
 	// 加载配置文件
