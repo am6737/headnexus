@@ -3,15 +3,15 @@ package ports
 import (
 	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app/rule"
-	"github.com/am6737/headnexus/domain/rule/entity"
+	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/pkg/http"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *HttpHandler) DeleteRule(c *gin.Context, id string) {
 	err := h.app.Rule.Commands.Handler.Delete(c, &rule.DeleteRule{
-		//UserID: "",
-		ID: id,
+		UserID: c.Value("user_id").(string),
+		ID:     id,
 	})
 	if err != nil {
 		http.FailedResponse(c, err.Error())
@@ -27,6 +27,8 @@ func (h *HttpHandler) ListRule(c *gin.Context, params v1.ListRuleParams) {
 	}
 
 	listRule, err := h.app.Rule.Queries.Handler.Find(c, &rule.FindRule{
+		UserID: c.Value("user_id").(string),
+		HostID: params.RuleFindOptions.HostId,
 		//Name:     params.RuleFindOptions.HostId,
 		//Name:     params.RuleFindOptions.HostId,
 		PageSize: params.RuleFindOptions.PageSize,
@@ -53,7 +55,7 @@ func (h *HttpHandler) CreateRule(c *gin.Context) {
 	}
 
 	createRule, err := h.app.Rule.Commands.Handler.Create(c, &rule.CreateRule{
-		UserID:      "",
+		UserID:      c.Value("user_id").(string),
 		Type:        string(req.Type),
 		Action:      string(req.Action),
 		Name:        req.Name,

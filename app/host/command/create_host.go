@@ -30,7 +30,7 @@ func (h *HostHandler) Create(ctx context.Context, cmd *host.CreateHost) (*host.H
 		return nil, errors.New("lighthouse主机必须指定静态ip")
 	}
 
-	find, err := h.repo.Find(ctx, &entity.FindOptions{
+	find, err := h.repo.Find(ctx, &entity.HostFindOptions{
 		Name: cmd.Name,
 	})
 	if err != nil {
@@ -85,6 +85,13 @@ func (h *HostHandler) Create(ctx context.Context, cmd *host.CreateHost) (*host.H
 			h.logger.WithError(err).Error("recycle address failed")
 		}
 		return nil, err
+	}
+
+	if len(cmd.Rules) > 0 {
+		if err := h.hostRuleRepo.AddHostRule(ctx, r.ID, cmd.Rules...); err != nil {
+			h.logger.WithError(err).Error("add host rule failed")
+			return nil, err
+		}
 	}
 
 	r2 := host.ConvertEntityToHost(r)

@@ -11,6 +11,7 @@ type CreateHost struct {
 	NetworkID       string
 	Role            string
 	StaticAddresses []string
+	Rules           []string
 	IPAddress       string
 	Port            int
 	IsLighthouse    bool
@@ -66,10 +67,18 @@ type EnrollHostResponse struct {
 	Online     bool
 }
 
+type AddHostRule struct {
+	UserID string
+	HostID string
+	Rules  []string
+}
+
 type CommandHandler interface {
 	Create(ctx context.Context, cmd *CreateHost) (*Host, error)
 	Delete(ctx context.Context, cmd *DeleteHost) error
 	Update(ctx context.Context, cmd *UpdateHost) (*Host, error)
+
+	AddHostRule(ctx context.Context, cmd *AddHostRule) ([]*entity.Rule, error)
 
 	EnrollHost(ctx context.Context, cmd *EnrollHost) (*EnrollHostResponse, error)
 	GenerateEnrollCode(ctx context.Context, cmd *GenerateEnrollCode) (*GenerateEnrollCodeResponse, error)
@@ -113,9 +122,18 @@ type Host struct {
 	Config string
 }
 
+type ListHostRules struct {
+	UserID   string
+	HostID   string
+	PageSize int
+	PageNum  int
+}
+
 type QueryHandler interface {
 	Get(ctx context.Context, query *GetHost) (*Host, error)
 	Find(ctx context.Context, query *FindHost) ([]*Host, error)
+
+	ListHostRules(ctx context.Context, query *ListHostRules) ([]*entity.Rule, error)
 }
 
 type Application struct {

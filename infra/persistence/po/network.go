@@ -2,6 +2,7 @@ package po
 
 type Network struct {
 	ID        string   `bson:"_id,omitempty"`
+	Owner     string   `bson:"owner"`
 	Name      string   `bson:"name"`
 	Cidr      string   `bson:"cidr"`
 	UsedIPs   []string `bson:"used_ips"`

@@ -2,12 +2,22 @@ package main
 
 import (
 	"context"
+	"flag"
 	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/ports"
 	"github.com/am6737/headnexus/service"
 	"github.com/sirupsen/logrus"
 	"os"
 )
+
+var (
+	configPath string
+)
+
+func init() {
+	flag.StringVar(&configPath, "config", "", "配置文件路径")
+	flag.Parse()
+}
 
 func main() {
 	ctx := context.Background()
@@ -20,10 +30,12 @@ func main() {
 		FullTimestamp:   true,
 	})
 
-	// 从环境变量中获取配置文件路径
-	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
-		logger.Fatal("未指定配置文件路径，请设置 CONFIG_PATH 环境变量")
+		// 从环境变量中获取配置文件路径
+		configPath = os.Getenv("CONFIG_PATH")
+		if configPath == "" {
+			logger.Fatal("未指定配置文件路径，请设置 CONFIG_PATH 环境变量")
+		}
 	}
 
 	// 加载配置文件
@@ -35,7 +47,7 @@ func main() {
 
 	app := service.NewApplication(ctx, cfg, logger)
 
-	httpSrv := ports.NewHttpHandler(app)
+	httpSrv := ports.NewHttpHandler(cfg, app)
 
 	if err := httpSrv.Start(ctx); err != nil {
 		logger.Fatal(err)

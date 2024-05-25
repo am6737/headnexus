@@ -17,7 +17,7 @@ type Config struct {
 	Outbound      []OutboundRule      `yaml:"outbound"`
 	Inbound       []InboundRule       `yaml:"inbound"`
 	Persistence   Persistence         `yaml:"persistence"`
-	JwtConfig     JwtConfig           `yaml:"jwt"`
+	Http          HttpConfig          `yaml:"http"`
 	Email         EmailConfig         `yaml:"email"`
 }
 
@@ -53,6 +53,11 @@ type TunConfig struct {
 	DropMulticast      bool   `yaml:"drop_multicast"`
 	TxQueue            int    `yaml:"tx_queue"`
 	MTU                int    `yaml:"mtu"`
+}
+
+type HttpConfig struct {
+	Addr string    `yaml:"addr"`
+	JWT  JwtConfig `yaml:"jwt"`
 }
 
 type EmailConfig struct {

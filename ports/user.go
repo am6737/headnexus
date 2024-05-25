@@ -3,11 +3,36 @@ package ports
 import (
 	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app/user"
+	ctime "github.com/am6737/headnexus/common/time"
+	"github.com/am6737/headnexus/domain/user/entity"
 	"github.com/am6737/headnexus/pkg/http"
 	pkgstring "github.com/am6737/headnexus/pkg/string"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
+
+func (h *HttpHandler) GetUserInfo(c *gin.Context) {
+	uid := c.Value("user_id").(string)
+	if uid == "" {
+		http.FailedResponse(c, "user not found")
+		return
+	}
+	userInfo, err := h.app.User.Queries.Handler.Get(c, &user.GetUser{ID: uid})
+	if err != nil {
+		http.FailedResponse(c, err.Error())
+		return
+	}
+
+	http.SuccessResponse(c, "获取用户信息成功", getUserInfoToResponse(userInfo))
+}
+
+func getUserInfoToResponse(info *entity.User) *v1.UserInfo {
+	return &v1.UserInfo{
+		Email:       info.Email,
+		Id:          info.ID,
+		LastLoginAt: ctime.FormatTimeSince(info.LastLoginAt),
+	}
+}
 
 func (h *HttpHandler) ChangePassword(c *gin.Context) {
 	req := &v1.ChangePasswordRequest{}

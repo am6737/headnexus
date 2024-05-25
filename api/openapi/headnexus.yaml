@@ -6,12 +6,89 @@ info:
 servers:
   - url: http://your-api-url.com
 paths:
+  /api/v1/hosts/{hostId}/rules:
+    get:
+      summary: 获取主机规则
+      operationId: listHostRules
+      tags:
+        - host
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: hostId
+          schema:
+            type: string
+            description: 主机id
+        - name: page_num
+          in: query
+          description: 页码
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          description: 页大小
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 获取主机规则成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rules:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Rule'
+    post:
+      summary: 添加主机规则
+      operationId: addHostRule
+      tags:
+        - host
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: hostId
+          schema:
+            type: string
+            description: 主机id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rules:
+                  type: array
+                  items:
+                    type: string
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+        responses:
+          '200':
+            description: 添加主机规则成功
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    rules:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Rule'
   /api/v1/rules:
     get:
       operationId: listRule
       summary: List all rules
       tags:
         - rule
+      security:
+        - BearerAuth: []
       parameters:
         - in: query
           name: ruleFindOptions
@@ -54,6 +131,8 @@ paths:
       summary: deleteRule
       tags:
         - rule
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: id
@@ -69,6 +148,8 @@ paths:
       summary: List all hosts
       tags:
         - host
+      security:
+        - BearerAuth: []
       parameters:
         - in: query
           name: findOptions
@@ -95,7 +176,51 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Host'
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Host name
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                network_id:
+                  type: string
+                  description: Network id
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                ip_address:
+                  type: string
+                  description: IP address
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                role:
+                  type: string
+                  description: Host type
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                port:
+                  type: string
+                  description: Host listening port
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                is_lighthouse:
+                  type: boolean
+                  description: SIS lighthouse
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                static_addresses:
+                  type: array
+                  items:
+                    type: string
+                  description: Static addresses
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                rules:
+                  type: array
+                  items:
+                    type: string
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
       responses:
         '200':
           description: 添加主机
@@ -109,6 +234,8 @@ paths:
       summary: Get a host
       tags:
         - host
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: hostId
@@ -165,6 +292,8 @@ paths:
       summary: Create an enroll host
       tags:
         - host
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: hostId
@@ -201,6 +330,8 @@ paths:
       summary: Create an enroll code
       tags:
         - host
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: hostId
@@ -219,6 +350,8 @@ paths:
       operationId: checkEnrollCode
       tags:
         - host
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: hostId
@@ -249,6 +382,8 @@ paths:
       summary: List all networks
       tags:
         - network
+      security:
+        - BearerAuth: []
       responses:
         '200':
           description: Successful response
@@ -283,6 +418,8 @@ paths:
       summary: Get a network
       tags:
         - network
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: networkId
@@ -337,10 +474,27 @@ paths:
       responses:
         '204':
           description: Successful response
-  /api/v1/user/login:
+  /api/v1/users/me:
+    get:
+      summary: 获取当前用户信息
+      operationId: getUserInfo
+      tags:
+        - user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 获取当前用户信息成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+  /api/v1/users/login:
     post:
-      summary: User login
+      summary: 用户登录
       operationId: loginUser
+      tags:
+        - user
       requestBody:
         required: true
         content:
@@ -348,12 +502,21 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
       responses:
-        '204':
-          description: Successful response
-  /api/v1/user/register:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /api/v1/users/register:
     post:
       summary: User registration
       operationId: registerUser
+      tags:
+        - user
       requestBody:
         required: true
         content:
@@ -363,10 +526,12 @@ paths:
       responses:
         '204':
           description: Successful response
-  /api/v1/user/verify-code:
+  /api/v1/users/verify-code:
     post:
       summary: Verify verification code
       operationId: verifyCode
+      tags:
+        - user
       requestBody:
         required: true
         content:
@@ -376,12 +541,14 @@ paths:
       responses:
         '204':
           description: Successful response
-  /api/v1/user/change-password:
+  /api/v1/users/change-password:
     post:
-      security:
-        - BearerAuth: [ ]
       summary: Change user password
       operationId: changePassword
+      tags:
+        - user
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -391,10 +558,12 @@ paths:
       responses:
         '204':
           description: Successful response
-  /api/v1/user/send-code:
+  /api/v1/users/send-code:
     post:
       summary: 发送验证码
       operationId: sendCode
+      tags:
+        - user
       requestBody:
         required: true
         content:
@@ -417,6 +586,19 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    UserInfo:
+      type: object
+      required:
+        - id
+        - email
+        - last_login_at
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        last_login_at:
+          type: string
     Rule:
       type: object
       required:

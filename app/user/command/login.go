@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"errors"
+	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/user/entity"
 	pkgstring "github.com/am6737/headnexus/pkg/string"
 	"github.com/dgrijalva/jwt-go"
@@ -36,6 +37,7 @@ func (h *UserHandler) Login(ctx context.Context, email string, password string) 
 	}
 
 	u1.Token = token
+	u1.LastLoginAt = ctime.CurrentTimestampMillis()
 
 	err = h.repo.Update(ctx, u1)
 	if err != nil {

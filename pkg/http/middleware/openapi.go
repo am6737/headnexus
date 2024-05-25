@@ -78,7 +78,6 @@ func Authenticate(ctx context.Context, jwt2 *pkgjwt.JWTConfig, input *openapi3fi
 		return err
 	}
 
-	fmt.Println("jws:", jws)
 	token, err := jwt2.ParseTokenWithKey(jws)
 	if err != nil || token.Valid == nil {
 		return err
@@ -94,6 +93,7 @@ func Authenticate(ctx context.Context, jwt2 *pkgjwt.JWTConfig, input *openapi3fi
 
 	gctx := omiddleware.GetGinContext(ctx)
 	gctx.Set("user_id", claims["user_id"])
+	fmt.Println(gctx.Value("user_id"), gctx.Value("user_id"))
 	return nil
 }
 

@@ -31,8 +31,8 @@ func NewApplication(ctx context.Context, cfg *config.Config, logger *logrus.Logg
 	}
 
 	jwtc := &pkgjwt.JWTConfig{
-		SecretKey:      cfg.JwtConfig.Secret,
-		ExpiryDuration: cfg.JwtConfig.Expiry,
+		SecretKey:      cfg.Http.JWT.Secret,
+		ExpiryDuration: cfg.Http.JWT.Expiry,
 	}
 
 	emailClient, err := email.NewEmailClient(cfg.Email.Host, cfg.Email.Port, cfg.Email.Username, cfg.Email.Password)
@@ -40,17 +40,17 @@ func NewApplication(ctx context.Context, cfg *config.Config, logger *logrus.Logg
 		panic(err)
 	}
 
+	repos := persistence.NewRepositories(mongodbConn, cfg.Persistence.DB)
+
 	networkRepo := persistence.NewNetworkMongoDBRepository(mongodbConn, cfg.Persistence.DB)
 	nc := networkCommand.NewNetworkHandler(networkRepo, logger)
 	nq := networkQuery.NewNetworkHandler(networkRepo, logger)
 
-	hostRepo := persistence.NewHostMongodbRepository(mongodbConn, cfg.Persistence.DB)
-	hc := hostCommand.NewHostHandler(hostRepo, logger, nc)
-	hq := hostsQuery.NewHostHandler(hostRepo, logger, nc)
+	hc := hostCommand.NewHostHandler(repos.HostRepo, repos.HostRuleRepo, repos, logger, nc)
+	hq := hostsQuery.NewHostHandler(repos.HostRepo, repos.HostRuleRepo, repos.RuleRepo, logger, nc)
 
-	ruleRepo := persistence.NewRuleMongodbRepository(mongodbConn, cfg.Persistence.DB)
-	rc := ruleCommand.NewRuleHandler(ruleRepo, logger)
-	rq := ruleQuery.NewRuleHandler(ruleRepo, logger)
+	rc := ruleCommand.NewRuleHandler(repos.RuleRepo, logger)
+	rq := ruleQuery.NewRuleHandler(repos.RuleRepo, logger)
 
 	userRepo := persistence.NewUserMongodbRepository(mongodbConn, cfg.Persistence.DB)
 

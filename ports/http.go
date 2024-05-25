@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app"
+	"github.com/am6737/headnexus/config"
 	pkghttp "github.com/am6737/headnexus/pkg/http"
 	"github.com/am6737/headnexus/pkg/http/middleware"
 	"github.com/getkin/kin-openapi/openapi3filter"
@@ -20,13 +21,15 @@ var _ v1.ServerInterface = &HttpHandler{}
 
 //var _ interfaces.Runnable = &HttpHandler{}
 
-func NewHttpHandler(app *app.Application) *HttpHandler {
+func NewHttpHandler(c *config.Config, app *app.Application) *HttpHandler {
 	return &HttpHandler{
 		app: app,
+		c:   c,
 	}
 }
 
 type HttpHandler struct {
+	c   *config.Config
 	app *app.Application
 }
 
@@ -50,6 +53,7 @@ func (h *HttpHandler) Start(ctx context.Context) error {
 	}
 	validatorOptions.Options.AuthenticationFunc = func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 		return middleware.HandleOpenApiAuthentication(ctx, h.app.JwtConfig, input)
+		//return nil
 	}
 
 	// Use our validation middleware to check all requests against the
@@ -60,7 +64,7 @@ func (h *HttpHandler) Start(ctx context.Context) error {
 
 	//r.Use(middleware.OapiRequestValidator(swagger))
 	server := pkghttp.NewServer(r)
-	server.Addr = ":7777"
+	server.Addr = h.c.Http.Addr
 
 	serverShutdown := make(chan struct{})
 	go func() {
