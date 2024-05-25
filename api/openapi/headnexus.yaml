@@ -527,17 +527,23 @@ paths:
         '204':
           description: Successful response
   /api/v1/users/verify-code:
-    post:
+    get:
       summary: Verify verification code
       operationId: verifyCode
-      tags:
-        - user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VerifyCodeRequest'
+      parameters:
+        - name: email
+          in: query
+          description: User email address
+          required: true
+          schema:
+            type: string
+            format: email
+        - name: code
+          in: query
+          description: Verification code
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           description: Successful response
@@ -569,13 +575,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - email
-              properties:
-                email:
-                  type: string
-                  format: email
+              $ref: '#/components/schemas/SendCodeRequest'
       responses:
         '204':
           description: Successful response
@@ -897,7 +897,7 @@ components:
           enum:
             - none
             - lighthouse
-    VerifyCodeRequest:
+    SendCodeRequest:
       type: object
       properties:
         email:

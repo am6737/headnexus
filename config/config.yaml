@@ -4,7 +4,7 @@ persistence:
   type: "mongodb"
   db: "nexus"
 http:
-  addr: :7777
+  addr: 127.0.0.1:7777
   jwt:
     secret: "123456"
     expire: "72h"

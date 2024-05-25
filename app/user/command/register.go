@@ -3,12 +3,13 @@ package command
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/am6737/headnexus/app/user"
 	"github.com/am6737/headnexus/domain/user/entity"
 	pkgjwt "github.com/am6737/headnexus/pkg/jwt"
 	pkgstring "github.com/am6737/headnexus/pkg/string"
 	"github.com/dgrijalva/jwt-go"
-	"time"
 )
 
 func (h *UserHandler) Register(ctx context.Context, cmd *user.CreateUser) (*entity.User, error) {
@@ -47,7 +48,8 @@ func (h *UserHandler) Register(ctx context.Context, cmd *user.CreateUser) (*enti
 		return nil, err
 	}
 
-	if err := h.emailClient.SendEmail(cmd.Email, "验证码", code); err != nil {
+	//todo 优化激活邮件链接的前缀
+	if err := h.emailClient.SendEmail(cmd.Email, "激活账号", getEmailTemplate(fmt.Sprintf("%s://%s", "http", h.httpConfig.Addr), cmd.Email, code)); err != nil {
 		fmt.Println("4", err)
 		return nil, err
 	}
