@@ -20,6 +20,9 @@ func (h *UserHandler) Verify(ctx context.Context, email, code string) error {
 		return fmt.Errorf("user not found")
 	}
 
+	if find[0].Status == entity.Normal {
+		return fmt.Errorf("请勿重复激活")
+	}
 	c, err := pkgjwt.ParseTokenWithKey(find[0].Verification, []byte(code))
 	if err != nil {
 		return fmt.Errorf("激活失败：%v", err.Error())

@@ -118,14 +118,9 @@ func (h *HttpHandler) RegisterUser(c *gin.Context) {
 	http.SuccessResponse(c, "注册成功", nil)
 }
 
-func (h *HttpHandler) VerifyCode(c *gin.Context) {
-	req := &v1.VerifyCodeRequest{}
-	if err := c.ShouldBindJSON(req); err != nil {
-		http.FailedResponse(c, "参数错误")
-		return
-	}
+func (h *HttpHandler) VerifyCode(c *gin.Context, params v1.VerifyCodeParams) {
 
-	email, err := req.Email.MarshalJSON()
+	email, err := params.Email.MarshalJSON()
 	if err != nil {
 		http.FailedResponse(c, "参数错误")
 		return
@@ -134,7 +129,7 @@ func (h *HttpHandler) VerifyCode(c *gin.Context) {
 	// 去除双引号
 	newemail := strings.Trim(string(email), "\"")
 
-	if err := h.app.User.Commands.Handler.Verify(c, newemail, *req.Code); err != nil {
+	if err := h.app.User.Commands.Handler.Verify(c, newemail, params.Code); err != nil {
 		http.FailedResponse(c, err.Error())
 		return
 	}
@@ -143,7 +138,7 @@ func (h *HttpHandler) VerifyCode(c *gin.Context) {
 }
 
 func (h *HttpHandler) SendCode(c *gin.Context) {
-	req := &v1.VerifyCodeRequest{}
+	req := &v1.SendCodeRequest{}
 	if err := c.ShouldBindJSON(req); err != nil {
 		http.FailedResponse(c, "参数错误")
 		return

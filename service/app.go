@@ -54,7 +54,7 @@ func NewApplication(ctx context.Context, cfg *config.Config, logger *logrus.Logg
 
 	userRepo := persistence.NewUserMongodbRepository(mongodbConn, cfg.Persistence.DB)
 
-	uc := userCommand.NewUserHandler(userRepo, logger, jwtc, emailClient)
+	uc := userCommand.NewUserHandler(userRepo, logger, jwtc, emailClient, cfg.Listen)
 	uq := userQuery.NewUserHandler(userRepo, logger)
 
 	return &app.Application{
