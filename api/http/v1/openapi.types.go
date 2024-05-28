@@ -23,24 +23,50 @@ const (
 	HostFindOptionsRoleNone       HostFindOptionsRole = "none"
 )
 
+// Defines values for HostRuleAction.
+const (
+	HostRuleActionAllow HostRuleAction = "allow"
+	HostRuleActionDeny  HostRuleAction = "deny"
+)
+
+// Defines values for HostRuleProto.
+const (
+	HostRuleProtoAny  HostRuleProto = "any"
+	HostRuleProtoIcmp HostRuleProto = "icmp"
+	HostRuleProtoTcp  HostRuleProto = "tcp"
+	HostRuleProtoUdp  HostRuleProto = "udp"
+)
+
+// Defines values for HostRuleType.
+const (
+	HostRuleTypeInbound  HostRuleType = "inbound"
+	HostRuleTypeOutbound HostRuleType = "outbound"
+)
+
 // Defines values for RuleAction.
 const (
-	Allow RuleAction = "allow"
-	Deny  RuleAction = "deny"
+	RuleActionAllow RuleAction = "allow"
+	RuleActionDeny  RuleAction = "deny"
 )
 
 // Defines values for RuleProto.
 const (
-	Any  RuleProto = "any"
-	Icmp RuleProto = "icmp"
-	Tcp  RuleProto = "tcp"
-	Udp  RuleProto = "udp"
+	RuleProtoAny  RuleProto = "any"
+	RuleProtoIcmp RuleProto = "icmp"
+	RuleProtoTcp  RuleProto = "tcp"
+	RuleProtoUdp  RuleProto = "udp"
 )
 
 // Defines values for RuleType.
 const (
-	Inbound  RuleType = "inbound"
-	Outbound RuleType = "outbound"
+	RuleTypeInbound  RuleType = "inbound"
+	RuleTypeOutbound RuleType = "outbound"
+)
+
+// Defines values for CreateHostJSONBodyRole.
+const (
+	Lighthouse CreateHostJSONBodyRole = "lighthouse"
+	None       CreateHostJSONBodyRole = "none"
 )
 
 // ChangePasswordRequest defines model for ChangePasswordRequest.
@@ -82,6 +108,15 @@ type CreateNetworkResponse struct {
 
 	// Name Name of the network
 	Name string `json:"name"`
+}
+
+// EnrollHostResponse defines model for EnrollHostResponse.
+type EnrollHostResponse struct {
+	Config     string `json:"config"`
+	EnrollAt   int64  `json:"enroll_at"`
+	HostId     string `json:"host_id"`
+	LastSeenAt string `json:"last_seen_at"`
+	Online     bool   `json:"online"`
 }
 
 // Host defines model for Host.
@@ -145,6 +180,29 @@ type HostFindOptions struct {
 
 // HostFindOptionsRole Filter by role
 type HostFindOptionsRole string
+
+// HostRule defines model for HostRule.
+type HostRule struct {
+	Action      HostRuleAction `json:"action"`
+	CreatedAt   string         `json:"created_at"`
+	Description string         `json:"description"`
+	Host        []string       `json:"host"`
+	HostId      string         `json:"host_id"`
+	Id          string         `json:"id"`
+	Name        string         `json:"name"`
+	Port        string         `json:"port"`
+	Proto       HostRuleProto  `json:"proto"`
+	Type        HostRuleType   `json:"type"`
+}
+
+// HostRuleAction defines model for HostRule.Action.
+type HostRuleAction string
+
+// HostRuleProto defines model for HostRule.Proto.
+type HostRuleProto string
+
+// HostRuleType defines model for HostRule.Type.
+type HostRuleType string
 
 // LoginRequest defines model for LoginRequest.
 type LoginRequest struct {
@@ -214,6 +272,24 @@ type SendCodeRequest struct {
 	Email *openapi_types.Email `json:"email,omitempty"`
 }
 
+// ShortHost defines model for ShortHost.
+type ShortHost struct {
+	CreatedAt string `json:"created_at"`
+
+	// Id ID of the host
+	Id         string `json:"id"`
+	IpAddress  string `json:"ip_address"`
+	LastSeenAt string `json:"last_seen_at"`
+	Name       string `json:"name"`
+
+	// Online Whether the host is online or not
+	Online bool `json:"online"`
+	Port   int  `json:"port"`
+
+	// PublicIp Public IP address
+	PublicIp string `json:"public_ip"`
+}
+
 // UserInfo defines model for UserInfo.
 type UserInfo struct {
 	Email       string `json:"email"`
@@ -242,20 +318,21 @@ type CreateHostJSONBody struct {
 	NetworkId string `json:"network_id"`
 
 	// Port Host listening port
-	Port string `json:"port"`
+	Port int `json:"port"`
+
+	// PublicIp 公网ip
+	PublicIp string `json:"public_ip"`
 
 	// Role Host type
-	Role  string   `json:"role"`
-	Rules []string `json:"rules"`
+	Role  CreateHostJSONBodyRole `json:"role"`
+	Rules []string               `json:"rules"`
 
 	// StaticAddresses Static addresses
 	StaticAddresses []string `json:"static_addresses"`
 }
 
-// CreateEnrollJSONBody defines parameters for CreateEnroll.
-type CreateEnrollJSONBody struct {
-	Code string `json:"code"`
-}
+// CreateHostJSONBodyRole defines parameters for CreateHost.
+type CreateHostJSONBodyRole string
 
 // CheckEnrollCodeJSONBody defines parameters for CheckEnrollCode.
 type CheckEnrollCodeJSONBody struct {
@@ -296,9 +373,6 @@ type CreateHostJSONRequestBody CreateHostJSONBody
 
 // UpdateHostJSONRequestBody defines body for UpdateHost for application/json ContentType.
 type UpdateHostJSONRequestBody = Host
-
-// CreateEnrollJSONRequestBody defines body for CreateEnroll for application/json ContentType.
-type CreateEnrollJSONRequestBody CreateEnrollJSONBody
 
 // CheckEnrollCodeJSONRequestBody defines body for CheckEnrollCode for application/json ContentType.
 type CheckEnrollCodeJSONRequestBody CheckEnrollCodeJSONBody

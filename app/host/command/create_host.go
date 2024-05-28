@@ -91,7 +91,7 @@ func (h *createHostHandler) Handle(ctx context.Context, cmd *CreateHost) (*entit
 	}
 
 	var hc config.HostConfig
-	if cmd.Role == string(v1.Lighthouse) {
+	if cmd.Role == string(v1.HostRoleLighthouse) {
 		hc = config.GenerateLighthouseConfigTemplate()
 	} else {
 		hc = config.GenerateConfigTemplate()

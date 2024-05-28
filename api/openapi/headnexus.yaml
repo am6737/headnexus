@@ -6,6 +6,28 @@ info:
 servers:
   - url: http://your-api-url.com
 paths:
+  /api/v1/hosts/enroll/{code}:
+    post:
+      summary: 注册主机
+      operationId: enrollHost
+      tags:
+        - host
+#      security:
+#        - BearerAuth: []
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+            description: 注册代码
+      responses:
+        '200':
+          description: 注册主机成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollHostResponse'
   /api/v1/hosts/{hostId}/config:
     get:
       summary: 获取主机配置
@@ -89,7 +111,7 @@ paths:
                   rules:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Rule'
+                      $ref: '#/components/schemas/HostRule'
     post:
       summary: 添加主机规则
       operationId: addHostRule
@@ -210,10 +232,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Host'
+                  $ref: '#/components/schemas/ShortHost'
     post:
       operationId: createHost
-      summary: Create a new host
+      summary: 创建主机
       tags:
         - host
       security:
@@ -234,6 +256,12 @@ paths:
                   description: Network id
                   x-omitempty: false
                   x-go-type-skip-optional-pointer: true
+                public_ip:
+                  type: string
+                  description: 公网ip
+                  pattern: "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
                 ip_address:
                   type: string
                   description: IP address
@@ -242,10 +270,13 @@ paths:
                 role:
                   type: string
                   description: Host type
+                  enum:
+                    - none
+                    - lighthouse
                   x-omitempty: false
                   x-go-type-skip-optional-pointer: true
                 port:
-                  type: string
+                  type: integer
                   description: Host listening port
                   x-omitempty: false
                   x-go-type-skip-optional-pointer: true
@@ -300,6 +331,8 @@ paths:
       summary: Update a host
       tags:
         - host
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: hostId
@@ -320,22 +353,7 @@ paths:
                 $ref: '#/components/schemas/Host'
     delete:
       operationId: deleteHost
-      summary: Delete a host
-      tags:
-        - host
-      parameters:
-        - in: path
-          name: hostId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful response
-  /api/v1/hosts/{hostId}/enroll:
-    post:
-      operationId: createEnroll
-      summary: Create an enroll host
+      summary: 删除主机
       tags:
         - host
       security:
@@ -346,30 +364,47 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - code
-              properties:
-                code:
-                  type: string
       responses:
         '200':
           description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                  lifetime_seconds:
-                    type: integer
-                    format: int64
+#  /api/v1/hosts/{hostId}/enroll:
+#    post:
+#      operationId: createEnroll
+#      summary: Create an enroll host
+#      tags:
+#        - host
+#      security:
+#        - BearerAuth: []
+#      parameters:
+#        - in: path
+#          name: hostId
+#          required: true
+#          schema:
+#            type: string
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              type: object
+#              required:
+#                - code
+#              properties:
+#                code:
+#                  type: string
+#      responses:
+#        '200':
+#          description: Successful response
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                properties:
+#                  code:
+#                    type: string
+#                  lifetime_seconds:
+#                    type: integer
+#                    format: int64
   /api/v1/hosts/{hostId}/enroll-code:
     post:
       operationId: createEnrollCode
@@ -487,7 +522,9 @@ paths:
       operationId: updateNetwork
       summary: Update a network
       tags:
-        - network
+        - host
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: networkId
@@ -510,7 +547,9 @@ paths:
       operationId: deleteNetwork
       summary: Delete a host
       tags:
-        - network
+        - host
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: networkId

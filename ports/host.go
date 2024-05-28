@@ -11,6 +11,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (h *HttpHandler) CreateEnroll(c *gin.Context, hostId string) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (h *HttpHandler) EnrollHost(c *gin.Context, code string) {
 	enrollHost, err := h.app.Host.Commands.CreateEnrollHost.Handle(c, &command.CreateEnrollHost{
 		EnrollCode: code,
@@ -217,16 +222,16 @@ func (h *HttpHandler) CreateHost(c *gin.Context) {
 	}
 
 	host, err := h.app.Host.Commands.CreateHost.Handle(c, &command.CreateHost{
-		UserID:          c.GetString("user_id"),
-		Name:            req.Name,
-		NetworkID:       req.NetworkId,
-		IPAddress:       req.IpAddress,
-		PublicIP:        req.PublicIp,
-		Role:            string(req.Role),
-		IsLighthouse:    req.Role == v1.Lighthouse,
-		Port:            req.Port,
-		StaticAddresses: req.StaticAddresses,
-		Rules:           req.Rules,
+		UserID:       c.GetString("user_id"),
+		Name:         req.Name,
+		NetworkID:    req.NetworkId,
+		IPAddress:    req.IpAddress,
+		PublicIP:     req.PublicIp,
+		Role:         string(req.Role),
+		IsLighthouse: req.Role == v1.Lighthouse,
+		Port:         req.Port,
+		//StaticAddresses: req.StaticAddresses,
+		Rules: req.Rules,
 		//Tags:            req.Tags,
 	})
 	if err != nil {
