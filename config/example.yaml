@@ -1,0 +1,17 @@
+persistence:
+  enabled: true
+#  url: "mongodb://mongodb:27017"
+  url: mongodb://root:root@localhost:27017/nexus
+  type: "mongodb"
+  db: "nexus"
+http:
+  addr: 0.0.0.0:7777
+  jwt:
+    secret: ""
+    expire: "72h"
+email:
+  enabled: false
+  host: ""
+  port:
+  username: ""
+  password: ""
