@@ -225,8 +225,8 @@ func GenerateLighthouseConfigTemplate() HostConfig {
 		Listen:        defaultListen,
 		Tun:           defaultTun,
 		Handshake:     defaultHandshake,
-		//Outbound:      defaultLighthouseOutboundRule,
-		//Inbound:       defaultLighthouseInboundRule,
+		Outbound:      defaultLighthouseOutboundRule,
+		Inbound:       defaultLighthouseInboundRule,
 	}
 }
 
