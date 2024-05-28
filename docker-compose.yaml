@@ -20,6 +20,8 @@ services:
   headnexus:
     container_name: headnexus
     image: hub.hitosea.com/cossim/headnexus
+    ports:
+      - "7777:7777"
     command:
       - "--config"
       - "config.yaml"
