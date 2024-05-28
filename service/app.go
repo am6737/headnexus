@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/am6737/headnexus/app"
 	"github.com/am6737/headnexus/app/host"
 	hostCommand "github.com/am6737/headnexus/app/host/command"
@@ -54,7 +55,7 @@ func NewApplication(ctx context.Context, cfg *config.Config, logger *logrus.Logg
 
 	userRepo := persistence.NewUserMongodbRepository(mongodbConn, cfg.Persistence.DB)
 
-	uc := userCommand.NewUserHandler(userRepo, logger, jwtc, emailClient)
+	uc := userCommand.NewUserHandler(userRepo, logger, jwtc, emailClient, cfg.Http)
 	uq := userQuery.NewUserHandler(userRepo, logger)
 
 	return &app.Application{

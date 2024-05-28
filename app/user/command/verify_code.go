@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
+
 	"github.com/am6737/headnexus/domain/user/entity"
 	pkgjwt "github.com/am6737/headnexus/pkg/jwt"
 	"github.com/dgrijalva/jwt-go"
@@ -18,6 +19,10 @@ func (h *UserHandler) Verify(ctx context.Context, email, code string) error {
 
 	if len(find) == 0 {
 		return fmt.Errorf("user not found")
+	}
+
+	if find[0].Status == entity.Normal {
+		return fmt.Errorf("请勿重复激活")
 	}
 
 	c, err := pkgjwt.ParseTokenWithKey(find[0].Verification, []byte(code))

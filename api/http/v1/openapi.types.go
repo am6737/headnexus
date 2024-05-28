@@ -206,17 +206,17 @@ type RuleFindOptions struct {
 	PageSize int `json:"page_size"`
 }
 
+// SendCodeRequest defines model for SendCodeRequest.
+type SendCodeRequest struct {
+	Code  *string              `json:"code,omitempty"`
+	Email *openapi_types.Email `json:"email,omitempty"`
+}
+
 // UserInfo defines model for UserInfo.
 type UserInfo struct {
 	Email       string `json:"email"`
 	Id          string `json:"id"`
 	LastLoginAt string `json:"last_login_at"`
-}
-
-// VerifyCodeRequest defines model for VerifyCodeRequest.
-type VerifyCodeRequest struct {
-	Code  *string              `json:"code,omitempty"`
-	Email *openapi_types.Email `json:"email,omitempty"`
 }
 
 // ListHostParams defines parameters for ListHost.
@@ -280,9 +280,13 @@ type ListRuleParams struct {
 	RuleFindOptions *RuleFindOptions `form:"ruleFindOptions,omitempty" json:"ruleFindOptions,omitempty"`
 }
 
-// SendCodeJSONBody defines parameters for SendCode.
-type SendCodeJSONBody struct {
-	Email openapi_types.Email `json:"email"`
+// VerifyCodeParams defines parameters for VerifyCode.
+type VerifyCodeParams struct {
+	// Email User email address
+	Email openapi_types.Email `form:"email" json:"email"`
+
+	// Code Verification code
+	Code string `form:"code" json:"code"`
 }
 
 // CreateHostJSONRequestBody defines body for CreateHost for application/json ContentType.
@@ -319,7 +323,4 @@ type LoginUserJSONRequestBody = LoginRequest
 type RegisterUserJSONRequestBody = RegisterRequest
 
 // SendCodeJSONRequestBody defines body for SendCode for application/json ContentType.
-type SendCodeJSONRequestBody SendCodeJSONBody
-
-// VerifyCodeJSONRequestBody defines body for VerifyCode for application/json ContentType.
-type VerifyCodeJSONRequestBody = VerifyCodeRequest
+type SendCodeJSONRequestBody = SendCodeRequest

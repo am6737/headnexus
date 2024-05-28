@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/ports"
 	"github.com/am6737/headnexus/service"
@@ -38,6 +39,7 @@ func main() {
 		}
 	}
 
+	fmt.Println(configPath)
 	// 加载配置文件
 	cfg, err := config.Load(configPath)
 	if err != nil {
