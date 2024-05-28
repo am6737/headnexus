@@ -9,7 +9,6 @@ type Rule struct {
 	UserID      string
 	Name        string
 	Description string
-	HostID      string
 	Port        string
 	Proto       RuleProto
 	Action      RuleAction
@@ -53,6 +52,21 @@ const (
 	RuleProtoUDP  RuleProto = "udp"
 	RuleProtoICMP RuleProto = "icmp"
 )
+
+func (rp RuleProto) String() string {
+	switch rp {
+	case RuleProtoAny:
+		return "any"
+	case RuleProtoTCP:
+		return "tcp"
+	case RuleProtoUDP:
+		return "udp"
+	case RuleProtoICMP:
+		return "icmp"
+	default:
+		return "unknown"
+	}
+}
 
 type RuleAction uint8
 

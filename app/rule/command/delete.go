@@ -21,8 +21,7 @@ func (h *RuleHandler) Delete(ctx context.Context, cmd *rule.DeleteRule) error {
 		return code.Forbidden
 	}
 
-	err = h.repo.Delete(ctx, cmd.ID)
-	if err != nil {
+	if err = h.repo.Delete(ctx, cmd.ID); err != nil {
 		return err
 	}
 

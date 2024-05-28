@@ -4,17 +4,32 @@ services:
   mongodb:
     image: mongo
     container_name: mongodb
-#    restart: always
+    restart: unless-stopped
+    expose:
+      - "27017"
     ports:
       - "27017:27017"
     environment:
-#      TZ: Asia/Shanghai
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: root
+      TZ: Asia/Shanghai
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
       MONGO_INITDB_DATABASE: nexus
 #    command: ["--auth"]
     volumes:
-#      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
       - nexus_mongodb_data:/data/db
+  headnexus:
+    container_name: headnexus
+    image: hub.hitosea.com/cossim/headnexus
+    command:
+      - "--config"
+      - "config.yaml"
+    volumes:
+      - ./config/config.yaml:/config.yaml:ro
+    depends_on:
+      - mongodb
+    environment:
+      CONSUL_HTTP_TOKEN:
+    restart: unless-stopped
 volumes:
   nexus_mongodb_data:

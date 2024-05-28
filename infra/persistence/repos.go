@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	"github.com/am6737/headnexus/domain/host/repository"
+	networkRepo "github.com/am6737/headnexus/domain/network/repository"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -10,6 +11,7 @@ type Repositories struct {
 	HostRepo     repository.HostRepository
 	RuleRepo     repository.RuleRepository
 	HostRuleRepo repository.HostRuleRepository
+	NetworkRepo  networkRepo.NetworkRepository
 
 	client *mongo.Client
 	dbName string
@@ -20,6 +22,7 @@ func NewRepositories(client *mongo.Client, dbName string) *Repositories {
 		HostRepo:     NewHostMongodbRepository(client, dbName),
 		RuleRepo:     NewRuleMongodbRepository(client, dbName),
 		HostRuleRepo: NewHostMongodbRepository(client, dbName),
+		NetworkRepo:  NewNetworkMongoDBRepository(client, dbName),
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type UpdateHost struct {
+type UpdateHostStatus struct {
 	ID              string
 	Name            string
 	NetworkID       string
@@ -20,24 +20,24 @@ type UpdateHost struct {
 	Tags            map[string]interface{} `json:"tags"`
 }
 
-type UpdateHostHandler decorator.CommandHandler[*UpdateHost, *entity.Host]
+type UpdateHostStatusHandler decorator.CommandHandler[*UpdateHost, *entity.Host]
 
-func NewUpdateHostHandler(
+func NewUpdateHostStatusHandler(
 	logger *logrus.Logger,
 	repos persistence.Repositories,
-) UpdateHostHandler {
-	return &updateHostHandler{
+) UpdateHostStatusHandler {
+	return &updateHostStatusHandler{
 		logger: logger,
 		repos:  repos,
 	}
 }
 
-type updateHostHandler struct {
+type updateHostStatusHandler struct {
 	logger *logrus.Logger
 	repos  persistence.Repositories
 }
 
-func (h *updateHostHandler) Handle(ctx context.Context, cmd *UpdateHost) (*entity.Host, error) {
+func (h *updateHostStatusHandler) Handle(ctx context.Context, cmd *UpdateHost) (*entity.Host, error) {
 	//TODO implement me
 	panic("implement me")
 }

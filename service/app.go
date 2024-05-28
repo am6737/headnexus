@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/am6737/headnexus/app"
 	"github.com/am6737/headnexus/app/host"
 	hostCommand "github.com/am6737/headnexus/app/host/command"
@@ -43,28 +42,33 @@ func NewApplication(ctx context.Context, cfg *config.Config, logger *logrus.Logg
 
 	repos := persistence.NewRepositories(mongodbConn, cfg.Persistence.DB)
 
-	networkRepo := persistence.NewNetworkMongoDBRepository(mongodbConn, cfg.Persistence.DB)
-	nc := networkCommand.NewNetworkHandler(networkRepo, logger)
-	nq := networkQuery.NewNetworkHandler(networkRepo, logger)
-
-	hc := hostCommand.NewHostHandler(repos.HostRepo, repos.HostRuleRepo, repos, logger, nc)
-	hq := hostsQuery.NewHostHandler(repos.HostRepo, repos.HostRuleRepo, repos.RuleRepo, logger, nc)
+	nc := networkCommand.NewNetworkHandler(repos.NetworkRepo, logger)
+	nq := networkQuery.NewNetworkHandler(repos.NetworkRepo, logger)
 
 	rc := ruleCommand.NewRuleHandler(repos.RuleRepo, logger)
 	rq := ruleQuery.NewRuleHandler(repos.RuleRepo, logger)
 
 	userRepo := persistence.NewUserMongodbRepository(mongodbConn, cfg.Persistence.DB)
-
 	uc := userCommand.NewUserHandler(userRepo, logger, jwtc, emailClient, cfg.Http)
 	uq := userQuery.NewUserHandler(userRepo, logger)
 
 	return &app.Application{
 		Host: host.Application{
 			Commands: host.Commands{
-				Handler: hc,
+				AddHostRule:        hostCommand.NewAddHostRuleHandler(logger, *repos),
+				CreateHost:         hostCommand.NewCreateHostHandler(logger, *repos),
+				DeleteHost:         hostCommand.NewDeleteHostHandler(logger, *repos),
+				DeleteHostRule:     hostCommand.NewDeleteHostRuleHandler(logger, *repos),
+				GenerateEnrollCode: hostCommand.NewGenerateEnrollCodeHandler(logger, *repos),
+				EnrollCodeCheck:    hostCommand.NewEnrollCodeCheckHandler(logger, *repos),
+				CreateEnrollHost:   hostCommand.NewCreateEnrollHostHandler(logger, *repos),
+				UpdateHost:         hostCommand.NewUpdateHostHandler(logger, *repos),
 			},
 			Queries: host.Queries{
-				Handler: hq,
+				GetHostConfig: hostsQuery.NewGetHostConfigHandler(logger, *repos),
+				ListHostRules: hostsQuery.NewListHostRulesHandler(logger, *repos),
+				GetHost:       hostsQuery.NewGetHostHandler(logger, *repos),
+				FindHost:      hostsQuery.NewFindHostHandler(logger, *repos),
 			},
 		},
 		Network: network.Application{

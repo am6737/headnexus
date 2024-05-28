@@ -1,23 +1,27 @@
 package code
 
 type Error struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	code    int
+	message string
 }
 
 func NewError(code int, message string) *Error {
 	return &Error{
-		Code:    code,
-		Message: message,
+		code:    code,
+		message: message,
 	}
 }
 
 func (e *Error) Error() string {
-	return e.Message
+	return e.message
+}
+
+func (e *Error) Message() string {
+	return e.message
 }
 
 func (e *Error) SetMessage(message string) error {
-	e.Message = message
+	e.message = message
 	return e
 }
 

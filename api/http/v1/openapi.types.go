@@ -13,20 +13,20 @@ const (
 
 // Defines values for HostRole.
 const (
-	Lighthouse HostRole = "lighthouse"
-	None       HostRole = "none"
+	HostRoleLighthouse HostRole = "lighthouse"
+	HostRoleNone       HostRole = "none"
+)
+
+// Defines values for HostFindOptionsRole.
+const (
+	HostFindOptionsRoleLighthouse HostFindOptionsRole = "lighthouse"
+	HostFindOptionsRoleNone       HostFindOptionsRole = "none"
 )
 
 // Defines values for RuleAction.
 const (
 	Allow RuleAction = "allow"
 	Deny  RuleAction = "deny"
-)
-
-// Defines values for RuleDirection.
-const (
-	RuleDirectionInbound  RuleDirection = "inbound"
-	RuleDirectionOutbound RuleDirection = "outbound"
 )
 
 // Defines values for RuleProto.
@@ -39,8 +39,8 @@ const (
 
 // Defines values for RuleType.
 const (
-	RuleTypeInbound  RuleType = "inbound"
-	RuleTypeOutbound RuleType = "outbound"
+	Inbound  RuleType = "inbound"
+	Outbound RuleType = "outbound"
 )
 
 // ChangePasswordRequest defines model for ChangePasswordRequest.
@@ -84,16 +84,45 @@ type CreateNetworkResponse struct {
 	Name string `json:"name"`
 }
 
-// FindOptions defines model for FindOptions.
-type FindOptions struct {
+// Host defines model for Host.
+type Host struct {
+	CreatedAt string `json:"created_at"`
+
+	// Id ID of the host
+	Id         string `json:"id"`
+	IpAddress  string `json:"ip_address"`
+	LastSeenAt string `json:"last_seen_at"`
+	Name       string `json:"name"`
+	NetworkId  string `binding:"required" json:"network_id"`
+
+	// Online Whether the host is online or not
+	Online bool `json:"online"`
+	Port   int  `json:"port"`
+
+	// PublicIp Public IP address
+	PublicIp string   `json:"public_ip"`
+	Role     HostRole `json:"role"`
+
+	// StaticAddresses Static addresses
+	StaticAddresses map[string]string      `json:"static_addresses"`
+	Tags            map[string]interface{} `json:"tags"`
+}
+
+// HostRole defines model for Host.Role.
+type HostRole string
+
+// HostConfig defines model for HostConfig.
+type HostConfig struct {
+	Config string `json:"config"`
+}
+
+// HostFindOptions defines model for HostFindOptions.
+type HostFindOptions struct {
 	// Filters Filter options
 	Filters map[string]interface{} `json:"filters"`
 
 	// IpAddress Filter by IP address
 	IpAddress string `json:"ip_address"`
-
-	// IsLighthouse Filter by lighthouse status
-	IsLighthouse bool `json:"is_lighthouse"`
 
 	// Limit Number of results to return
 	Limit int `json:"limit"`
@@ -108,36 +137,14 @@ type FindOptions struct {
 	Offset int `json:"offset"`
 
 	// Role Filter by role
-	Role string `json:"role"`
+	Role HostFindOptionsRole `json:"role"`
 
 	// Sort Sorting options
 	Sort map[string]interface{} `json:"sort"`
 }
 
-// Host defines model for Host.
-type Host struct {
-	CreatedAt string `json:"created_at"`
-
-	// Id ID of the host
-	Id           string `json:"id"`
-	IpAddress    string `json:"ip_address"`
-	IsLighthouse bool   `json:"is_lighthouse"`
-	LastSeenAt   string `json:"last_seen_at"`
-	Name         string `json:"name"`
-	NetworkId    string `binding:"required" json:"network_id"`
-
-	// Online Whether the host is online or not
-	Online bool     `json:"online"`
-	Port   int      `json:"port"`
-	Role   HostRole `json:"role"`
-
-	// StaticAddresses A list of static addresses for the host
-	StaticAddresses []string               `json:"static_addresses"`
-	Tags            map[string]interface{} `json:"tags"`
-}
-
-// HostRole defines model for Host.Role.
-type HostRole string
+// HostFindOptionsRole Filter by role
+type HostFindOptionsRole string
 
 // LoginRequest defines model for LoginRequest.
 type LoginRequest struct {
@@ -169,24 +176,19 @@ type RegisterRequest struct {
 
 // Rule defines model for Rule.
 type Rule struct {
-	Action      RuleAction    `json:"action"`
-	CreatedAt   int           `json:"created_at"`
-	Description string        `json:"description"`
-	Direction   RuleDirection `json:"direction"`
-	Host        []string      `json:"host"`
-	HostId      string        `json:"host_id"`
-	Id          string        `json:"id"`
-	Name        string        `json:"name"`
-	Port        string        `json:"port"`
-	Proto       RuleProto     `json:"proto"`
-	Type        RuleType      `json:"type"`
+	Action      RuleAction `json:"action"`
+	CreatedAt   int        `json:"created_at"`
+	Description string     `json:"description"`
+	Host        []string   `json:"host"`
+	Id          string     `json:"id"`
+	Name        string     `json:"name"`
+	Port        string     `json:"port"`
+	Proto       RuleProto  `json:"proto"`
+	Type        RuleType   `json:"type"`
 }
 
 // RuleAction defines model for Rule.Action.
 type RuleAction string
-
-// RuleDirection defines model for Rule.Direction.
-type RuleDirection string
 
 // RuleProto defines model for Rule.Proto.
 type RuleProto string
@@ -222,7 +224,7 @@ type UserInfo struct {
 // ListHostParams defines parameters for ListHost.
 type ListHostParams struct {
 	// FindOptions Options for filtering, sorting, and pagination
-	FindOptions *FindOptions `form:"findOptions,omitempty" json:"findOptions,omitempty"`
+	FindOptions *HostFindOptions `form:"findOptions,omitempty" json:"findOptions,omitempty"`
 }
 
 // CreateHostJSONBody defines parameters for CreateHost.

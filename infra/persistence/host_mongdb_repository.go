@@ -3,11 +3,13 @@ package persistence
 import (
 	"context"
 	"errors"
+	"fmt"
 	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/domain/host/repository"
 	"github.com/am6737/headnexus/infra/persistence/converter"
 	"github.com/am6737/headnexus/infra/persistence/po"
+	"github.com/am6737/headnexus/pkg/code"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,6 +45,35 @@ type HostMongodbRepository struct {
 	db                 *mongo.Database
 	collection         *mongo.Collection
 	hostRuleCollection *mongo.Collection
+}
+
+func (h *HostMongodbRepository) GetHostByEnrollCode(ctx context.Context, code string) (*entity.Host, error) {
+	filter := bson.M{"enroll_code": code}
+	model := &po.Host{}
+	if err := h.collection.FindOne(ctx, filter).Decode(model); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrorHostNotFound
+		}
+		return nil, err
+	}
+
+	host, err := converter.HostPoToEntity(model)
+	if err != nil {
+		return nil, err
+	}
+
+	return host, nil
+}
+
+func (h *HostMongodbRepository) DeleteHostRule(ctx context.Context, hostID string, ruleID ...string) error {
+	filter := bson.M{"host_id": hostID, "rule_id": bson.M{"$in": ruleID}}
+
+	_, err := h.hostRuleCollection.DeleteMany(ctx, filter)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (h *HostMongodbRepository) AddHostRule(ctx context.Context, hostID string, ruleIDs ...string) error {
@@ -236,7 +267,12 @@ type FindOptions struct {
 }
 
 func (h *HostMongodbRepository) Find(ctx context.Context, options *entity.HostFindOptions) ([]*entity.Host, error) {
+	if options.UserID == "" {
+		return nil, code.InvalidParameter
+	}
+
 	filter := bson.M{}
+	filter["owner"] = options.UserID
 	if options.NetworkID != "" {
 		filter["network_id"] = options.NetworkID
 	}
@@ -249,7 +285,8 @@ func (h *HostMongodbRepository) Find(ctx context.Context, options *entity.HostFi
 	if options.Name != "" {
 		filter["name"] = options.Name
 	}
-	filter["is_lighthouse"] = options.IsLighthouse
+
+	fmt.Println("filter:", filter)
 
 	cursor, err := h.collection.Find(ctx, filter, ToFindOptions(options))
 	if err != nil {
@@ -264,7 +301,7 @@ func (h *HostMongodbRepository) Find(ctx context.Context, options *entity.HostFi
 			return nil, err
 		}
 
-		host, err := converter.HostPOToEntity(model)
+		host, err := converter.HostPoToEntity(model)
 		if err != nil {
 			return nil, err
 		}
@@ -306,7 +343,7 @@ func (h *HostMongodbRepository) Get(ctx context.Context, id string) (*entity.Hos
 		return nil, err
 	}
 
-	host, err := converter.HostPOToEntity(model)
+	host, err := converter.HostPoToEntity(model)
 	if err != nil {
 		return nil, err
 	}

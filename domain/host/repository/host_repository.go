@@ -13,6 +13,8 @@ type HostRepository interface {
 	Delete(ctx context.Context, id string) error
 	Find(ctx context.Context, options *entity.HostFindOptions) ([]*entity.Host, error)
 
+	GetHostByEnrollCode(ctx context.Context, code string) (*entity.Host, error)
+
 	// GetEnrollHost 获取主机的注册信息
 	GetEnrollHost(ctx context.Context, getEnrollHost *entity.GetEnrollHost) (*entity.EnrollHost, error)
 	// EnrollHost 注册主机

@@ -366,9 +366,9 @@ func (m *MongoDBRepository) Find(ctx context.Context, query *entity.QueryNetwork
 	// Sorting
 	options := options.Find()
 	if query.SortDirection == "asc" {
-		options.SetSort(bson.D{{"created_at", 1}})
+		options.SetSort(bson.D{{Key: "created_at", Value: 1}})
 	} else if query.SortDirection == "desc" {
-		options.SetSort(bson.D{{"created_at", -1}})
+		options.SetSort(bson.D{{Key: "created_at", Value: -1}})
 	}
 
 	cursor, err := m.networks.Find(ctx, filter, options)

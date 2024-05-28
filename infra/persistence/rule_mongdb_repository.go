@@ -56,6 +56,35 @@ func (m *RuleMongodbRepository) Create(ctx context.Context, userID string, rule 
 	return e, nil
 }
 
+func (m *RuleMongodbRepository) Gets(ctx context.Context, userID string, ids []string) ([]*entity.Rule, error) {
+	filter := bson.M{
+		"user_id": userID,
+		"_id":     bson.M{"$in": ids},
+	}
+
+	// 执行查询
+	cursor, err := m.collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	// 将结果解码为 PO 对象的切片
+	var models []*po.Rule
+	if err = cursor.All(ctx, &models); err != nil {
+		return nil, err
+	}
+
+	// 将 PO 对象转换为 Entity 对象
+	var rules []*entity.Rule
+	for _, model := range models {
+		rule := converter.RulePOToEntity(model)
+		rules = append(rules, rule)
+	}
+
+	return rules, nil
+}
+
 func (m *RuleMongodbRepository) Get(ctx context.Context, userID, id string) (*entity.Rule, error) {
 	filter := bson.M{"_id": id, "user_id": userID}
 	model := &po.Rule{}
@@ -86,15 +115,10 @@ func (m *RuleMongodbRepository) Update(ctx context.Context, userID string, rule 
 }
 
 func (m *RuleMongodbRepository) Delete(ctx context.Context, id string) error {
-	// 将字符串转换为 ObjectId
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
 
 	// 使用 ObjectId 构建过滤条件
-	filter := bson.M{"_id": objectID}
-	_, err = m.collection.DeleteOne(ctx, filter)
+	filter := bson.M{"_id": id}
+	_, err := m.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}

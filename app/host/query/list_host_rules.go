@@ -2,14 +2,41 @@ package query
 
 import (
 	"context"
-	"github.com/am6737/headnexus/app/host"
+	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/host/entity"
+	"github.com/am6737/headnexus/infra/persistence"
+	"github.com/am6737/headnexus/pkg/decorator"
+	"github.com/sirupsen/logrus"
 )
 
-func (h *HostHandler) ListHostRules(ctx context.Context, query *host.ListHostRules) ([]*entity.Rule, error) {
+type ListHostRules struct {
+	UserID   string
+	HostID   string
+	PageSize int
+	PageNum  int
+}
+
+type ListHostRulesHandler decorator.CommandHandler[*ListHostRules, []*entity.HostRule]
+
+func NewListHostRulesHandler(
+	logger *logrus.Logger,
+	repos persistence.Repositories,
+) ListHostRulesHandler {
+	return &listHostRulesHandler{
+		logger: logger,
+		repos:  repos,
+	}
+}
+
+type listHostRulesHandler struct {
+	logger *logrus.Logger
+	repos  persistence.Repositories
+}
+
+func (h *listHostRulesHandler) Handle(ctx context.Context, query *ListHostRules) ([]*entity.HostRule, error) {
 	// TODO 验证用户和主机权限
 
-	rule, err := h.hostRuleRepo.ListHostRule(ctx, &entity.ListHostRuleOptions{
+	rule, err := h.repos.HostRuleRepo.ListHostRule(ctx, &entity.ListHostRuleOptions{
 		HostID:   query.HostID,
 		PageSize: query.PageNum,
 		PageNum:  query.PageNum,
@@ -19,14 +46,26 @@ func (h *HostHandler) ListHostRules(ctx context.Context, query *host.ListHostRul
 		return nil, err
 	}
 
-	var rules []*entity.Rule
+	var rules []*entity.HostRule
 	for _, r := range rule {
-		rule, err := h.ruleRepo.Get(ctx, query.UserID, r.RuleID)
+		rule, err := h.repos.RuleRepo.Get(ctx, query.UserID, r.RuleID)
 		if err != nil {
 			h.logger.WithError(err).Error("failed to get rule")
 			return nil, err
 		}
-		rules = append(rules, rule)
+		rules = append(rules, &entity.HostRule{
+			Type:        rule.Type,
+			CreatedAt:   ctime.FormatTimestamp(rule.CreatedAt),
+			ID:          rule.ID,
+			HostID:      query.HostID,
+			UserID:      rule.UserID,
+			Name:        rule.Name,
+			Description: rule.Description,
+			Port:        rule.Port,
+			Proto:       rule.Proto,
+			Action:      rule.Action,
+			Host:        rule.Host,
+		})
 	}
 
 	h.logger.WithField("rules", rules).Info("主机规则列表")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/am6737/headnexus/pkg/code"
 	pkghttp "github.com/am6737/headnexus/pkg/http"
 	pkgjwt "github.com/am6737/headnexus/pkg/jwt"
 	"github.com/dgrijalva/jwt-go"
@@ -23,22 +24,19 @@ var (
 func HandleOpenAPIError(c *gin.Context, message string, statusCode int) {
 	if strings.Contains(message, "security requirements failed: authorization failed") {
 		statusCode = http.StatusUnauthorized
-		pkghttp.NewResponse(c, statusCode, message, nil)
-		//message = code.Unauthorized.Message()
+		message = code.Unauthorized.Message()
 	}
 	if strings.Contains(message, "request body has an error: doesn't match schema") {
 		index := strings.Index(message, "Error at")
 		if index != -1 {
 			message = strings.TrimSpace(message[index+len("Error at "):])
 		} else {
-			pkghttp.NewResponse(c, statusCode, message, nil)
-
+			//pkghttp.NewResponse(c, statusCode, message, nil)
+			//return
 			//message = code.InvalidParameter.Message()
 		}
 	}
 	pkghttp.NewResponse(c, statusCode, message, nil)
-
-	//response.SetResponse(c, statusCode, message, nil)
 }
 
 // GetJWSFromRequest extracts a JWS string from an Authorization: Bearer <jws> header
@@ -79,8 +77,11 @@ func Authenticate(ctx context.Context, jwt2 *pkgjwt.JWTConfig, input *openapi3fi
 	}
 
 	token, err := jwt2.ParseTokenWithKey(jws)
-	if err != nil || token.Valid == nil {
+	if err != nil {
 		return err
+	}
+	if token.Valid() != nil {
+		return token.Valid()
 	}
 
 	// 将用户信息存储到上下文中

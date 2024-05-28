@@ -3,35 +3,58 @@ package command
 import (
 	"context"
 	"errors"
-	"github.com/am6737/headnexus/app/host"
+	"fmt"
+	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/domain/host/entity"
+	"github.com/am6737/headnexus/infra/persistence"
+	"github.com/am6737/headnexus/pkg/decorator"
 	"github.com/segmentio/ksuid"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
-type CreateHostResponse struct {
-	ID              string
+type CreateHost struct {
 	Name            string
 	NetworkID       string
 	Role            string
-	CreatedAt       int64
-	LastSeenAt      int64
-	StaticAddresses []string
+	StaticAddresses map[string]string
+	Rules           []string
 	IPAddress       string
 	Port            int
 	IsLighthouse    bool
 	Tags            map[string]interface{}
+	UserID          string
+	PublicIP        string
 }
 
-func (h *HostHandler) Create(ctx context.Context, cmd *host.CreateHost) (*host.Host, error) {
+type CreateHostHandler decorator.CommandHandler[*CreateHost, *entity.Host]
+
+func NewCreateHostHandler(
+	logger *logrus.Logger,
+	repos persistence.Repositories,
+) CreateHostHandler {
+	return &createHostHandler{
+		logger: logger,
+		repos:  repos,
+	}
+}
+
+type createHostHandler struct {
+	logger *logrus.Logger
+	repos  persistence.Repositories
+}
+
+func (h *createHostHandler) Handle(ctx context.Context, cmd *CreateHost) (*entity.Host, error) {
 	h.logger.WithField("cmd", cmd).Info("Create Request")
 
-	if cmd.IsLighthouse && len(cmd.StaticAddresses) == 0 {
-		return nil, errors.New("lighthouse主机必须指定静态ip")
+	if cmd.IsLighthouse && cmd.PublicIP == "" {
+		return nil, errors.New("lighthouse主机必须有公网ip地址")
 	}
 
-	find, err := h.repo.Find(ctx, &entity.HostFindOptions{
-		Name: cmd.Name,
+	find, err := h.repos.HostRepo.Find(ctx, &entity.HostFindOptions{
+		UserID: cmd.UserID,
+		Name:   cmd.Name,
 	})
 	if err != nil {
 		return nil, err
@@ -42,13 +65,12 @@ func (h *HostHandler) Create(ctx context.Context, cmd *host.CreateHost) (*host.H
 	}
 
 	if cmd.IPAddress != "" {
-		_, err := h.nch.AllocateStaticAddress(ctx, cmd.NetworkID, cmd.IPAddress)
-		if err != nil {
+		if err := h.repos.NetworkRepo.AllocateIP(ctx, cmd.NetworkID, cmd.IPAddress); err != nil {
 			h.logger.WithError(err).Error("allocate static address failed")
 			return nil, err
 		}
 	} else {
-		ip, err := h.nch.AllocateAutoAddress(ctx, cmd.NetworkID)
+		ip, err := h.repos.NetworkRepo.AutoAllocateIP(ctx, cmd.NetworkID)
 		if err != nil {
 			h.logger.WithError(err).Error("allocate auto address failed")
 			return nil, err
@@ -61,39 +83,82 @@ func (h *HostHandler) Create(ctx context.Context, cmd *host.CreateHost) (*host.H
 	}
 
 	id := ksuid.New().String()
-	cfg := config.GenerateConfigTemplate()
-	cfg.Tun.IP = cmd.IPAddress
+
+	net, err := h.repos.NetworkRepo.Get(ctx, cmd.NetworkID)
+	if err != nil {
+		h.logger.WithError(err).Error("get network failed")
+		return nil, err
+	}
+
+	var hc config.HostConfig
+	if cmd.Role == string(v1.Lighthouse) {
+		hc = config.GenerateLighthouseConfigTemplate()
+	} else {
+		hc = config.GenerateConfigTemplate()
+
+	}
+
+	if len(cmd.Rules) > 0 {
+		rules, err := h.repos.RuleRepo.Gets(ctx, cmd.UserID, cmd.Rules)
+		if err != nil {
+			h.logger.WithError(err).Error("get rules failed")
+			return nil, err
+		}
+		for _, rule := range rules {
+			if rule.Type == entity.RuleTypeInbound {
+				hc.Inbound = append(hc.Inbound, config.InboundRule{
+					Port:   rule.Port,
+					Proto:  rule.Proto.String(),
+					Host:   rule.Host,
+					Action: rule.Action.String(),
+				})
+			}
+		}
+	}
+
+	hc.Listen.Port = cmd.Port
+	hc.Tun.IP = cmd.IPAddress
+	hc.Tun.Mask = net.Mask()
+
+	yamlData, err := yaml.Marshal(&hc)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	fmt.Println("----------------")
+	fmt.Println(string(yamlData))
+	fmt.Println("----------------")
 
 	e := &entity.Host{
-		ID:              id,
-		Name:            cmd.Name,
-		NetworkID:       cmd.NetworkID,
-		Role:            cmd.Role,
-		StaticAddresses: cmd.StaticAddresses,
-		IPAddress:       cmd.IPAddress,
-		Port:            cmd.Port,
-		IsLighthouse:    cmd.IsLighthouse,
-		Tags:            cmd.Tags,
-		Config:          cfg,
+		Owner:     cmd.UserID,
+		ID:        id,
+		Name:      cmd.Name,
+		NetworkID: cmd.NetworkID,
+		Role:      cmd.Role,
+		IPAddress: cmd.IPAddress,
+		PublicIP:  cmd.PublicIP,
+		Port:      cmd.Port,
+		Tags:      cmd.Tags,
+		Config:    hc,
 	}
 
 	h.logger.WithField("entity", e).Info("create host")
 
-	r, err := h.repo.Create(ctx, e)
+	r, err := h.repos.HostRepo.Create(ctx, e)
 	if err != nil {
-		if err := h.nch.RecycleAddress(ctx, cmd.NetworkID, cmd.IPAddress); err != nil {
+		if err := h.repos.NetworkRepo.ReleaseIP(ctx, cmd.NetworkID, cmd.IPAddress); err != nil {
 			h.logger.WithError(err).Error("recycle address failed")
 		}
 		return nil, err
 	}
 
 	if len(cmd.Rules) > 0 {
-		if err := h.hostRuleRepo.AddHostRule(ctx, r.ID, cmd.Rules...); err != nil {
+		if err := h.repos.HostRuleRepo.AddHostRule(ctx, r.ID, cmd.Rules...); err != nil {
 			h.logger.WithError(err).Error("add host rule failed")
 			return nil, err
 		}
 	}
 
-	r2 := host.ConvertEntityToHost(r)
-	return r2, nil
+	return r, nil
 }

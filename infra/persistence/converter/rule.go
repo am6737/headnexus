@@ -10,7 +10,6 @@ func RuleEntityToPO(e *entity.Rule) *po.Rule {
 	m.ID = e.ID
 	m.Name = e.Name
 	m.Description = e.Description
-	m.HostID = e.HostID
 	m.Port = e.Port
 	m.Proto = string(e.Proto)
 	m.Action = uint8(e.Action)
@@ -20,12 +19,12 @@ func RuleEntityToPO(e *entity.Rule) *po.Rule {
 
 func RulePOToEntity(po *po.Rule) *entity.Rule {
 	return &entity.Rule{
+		UserID:      po.UserID,
 		ID:          po.ID,
 		Type:        entity.RuleType(po.Type),
 		CreatedAt:   po.CreatedAt,
 		Name:        po.Name,
 		Description: po.Description,
-		HostID:      po.HostID,
 		Port:        po.Port,
 		Proto:       entity.RuleProto(po.Proto),
 		Action:      entity.RuleAction(po.Action),

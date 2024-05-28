@@ -4,11 +4,23 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
-	"strconv"
 	"time"
 )
 
 type Config struct {
+	//StaticHostMap map[string][]string `yaml:"static_host_map"`
+	//Lighthouse    LighthouseConfig    `yaml:"lighthouse"`
+	//Listen        ListenConfig        `yaml:"listen"`
+	//Tun           TunConfig           `yaml:"tun"`
+	//Handshake     HandshakeConfig     `yaml:"handshake"`
+	//Outbound      []OutboundRule      `yaml:"outbound"`
+	//Inbound       []InboundRule       `yaml:"inbound"`
+	Persistence Persistence `yaml:"persistence"`
+	Http        HttpConfig  `yaml:"http"`
+	Email       EmailConfig `yaml:"email"`
+}
+
+type HostConfig struct {
 	StaticHostMap map[string][]string `yaml:"static_host_map"`
 	Lighthouse    LighthouseConfig    `yaml:"lighthouse"`
 	Listen        ListenConfig        `yaml:"listen"`
@@ -16,9 +28,6 @@ type Config struct {
 	Handshake     HandshakeConfig     `yaml:"handshake"`
 	Outbound      []OutboundRule      `yaml:"outbound"`
 	Inbound       []InboundRule       `yaml:"inbound"`
-	Persistence   Persistence         `yaml:"persistence"`
-	Http          HttpConfig          `yaml:"http"`
-	Email         EmailConfig         `yaml:"email"`
 }
 
 type LighthouseConfig struct {
@@ -84,7 +93,7 @@ type HandshakeConfig struct {
 }
 
 type OutboundRule struct {
-	Port  AnyPort  `yaml:"port"`
+	Port  string   `yaml:"port"`
 	Proto string   `yaml:"proto"`
 	Host  []string `yaml:"host"`
 	// "allow" or "deny"
@@ -92,7 +101,7 @@ type OutboundRule struct {
 }
 
 type InboundRule struct {
-	Port  AnyPort  `yaml:"port"`
+	Port  string   `yaml:"port"`
 	Proto string   `yaml:"proto"`
 	Host  []string `yaml:"host"`
 	// "allow" or "deny"
@@ -114,38 +123,6 @@ func (r InboundRule) String() string {
 	return fmt.Sprintf("port=%v proto=%s hosts=%v action=%s", r.Port, r.Proto, r.Host, r.Action)
 }
 
-type AnyPort uint16
-
-const AnyPortValue AnyPort = 0
-
-func (p AnyPort) ToUint16() uint16 {
-	return uint16(p)
-}
-
-func (p *AnyPort) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var v interface{}
-	if err := unmarshal(&v); err != nil {
-		return err
-	}
-	switch value := v.(type) {
-	case string:
-		if value == "any" {
-			*p = AnyPortValue
-		} else {
-			port, err := strconv.ParseUint(value, 10, 16)
-			if err != nil {
-				return err
-			}
-			*p = AnyPort(port)
-		}
-	case int, int32, int64:
-		*p = AnyPort(value.(int))
-	default:
-		return fmt.Errorf("invalid port value: %v", v)
-	}
-	return nil
-}
-
 func Load(filename string) (*Config, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -163,7 +140,7 @@ func Load(filename string) (*Config, error) {
 var (
 	defaultListen = ListenConfig{
 		Host:        "0.0.0.0",
-		Port:        7777,
+		Port:        6796,
 		Batch:       64,
 		ReadBuffer:  10485760,
 		WriteBuffer: 10485760,
@@ -206,7 +183,7 @@ var (
 
 	defaultOutbound = []OutboundRule{
 		{
-			Port:   AnyPortValue,
+			Port:   "any",
 			Proto:  "icmp",
 			Host:   nil,
 			Action: "allow",
@@ -215,24 +192,52 @@ var (
 
 	defaultInbound = []InboundRule{
 		{
-			Port:   AnyPortValue,
+			Port:   "any",
 			Proto:  "icmp",
+			Host:   nil,
+			Action: "allow",
+		},
+	}
+
+	defaultLighthouseOutboundRule = []OutboundRule{
+		{
+			Port:   "any",
+			Proto:  "any",
+			Host:   nil,
+			Action: "allow",
+		},
+	}
+	defaultLighthouseInboundRule = []InboundRule{
+		{
+			Port:   "any",
+			Proto:  "any",
 			Host:   nil,
 			Action: "allow",
 		},
 	}
 )
 
-// GenerateConfigTemplate 生成通用配置模板
-func GenerateConfigTemplate() Config {
-	return Config{
+func GenerateLighthouseConfigTemplate() HostConfig {
+	return HostConfig{
 		StaticHostMap: make(map[string][]string),
 		Lighthouse:    defaultLighthouse,
 		Listen:        defaultListen,
 		Tun:           defaultTun,
 		Handshake:     defaultHandshake,
-		Outbound:      defaultOutbound,
-		Inbound:       defaultInbound,
-		Persistence:   defaultPersistence,
+		//Outbound:      defaultLighthouseOutboundRule,
+		//Inbound:       defaultLighthouseInboundRule,
+	}
+}
+
+// GenerateConfigTemplate 生成通用配置模板
+func GenerateConfigTemplate() HostConfig {
+	return HostConfig{
+		StaticHostMap: make(map[string][]string),
+		Lighthouse:    defaultLighthouse,
+		Listen:        defaultListen,
+		Tun:           defaultTun,
+		Handshake:     defaultHandshake,
+		//Outbound:      defaultOutbound,
+		//Inbound:       defaultInbound,
 	}
 }

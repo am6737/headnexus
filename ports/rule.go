@@ -75,8 +75,7 @@ func (h *HttpHandler) CreateRule(c *gin.Context) {
 func convertRuleToResponse(e *entity.Rule) *v1.Rule {
 	return &v1.Rule{
 		Id:          e.ID,
-		Type:        v1.RuleType(e.Type),
-		Direction:   v1.RuleDirection(e.Type.String()),
+		Type:        v1.RuleType(e.Type.String()),
 		Action:      v1.RuleAction(e.Action.String()),
 		Name:        e.Name,
 		Description: e.Description,

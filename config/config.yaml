@@ -1,6 +1,6 @@
 persistence:
   enabled: true
-  url: "mongodb://localhost:27017"
+  url: "mongodb://mongodb:27017"
   type: "mongodb"
   db: "nexus"
 http:

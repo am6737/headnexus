@@ -6,25 +6,23 @@ import (
 
 // Host 表示一个主机
 type Host struct {
-	ID        string
-	Name      string
-	NetworkID string
-	Role      string
-	IPAddress string
-	// StaticAddresses A list of static addresses for the host
-	StaticAddresses []string
-
-	Port         int
-	IsLighthouse bool
-	CreatedAt    int64
-	LastSeenAt   int64
-	EnrollAt     int64
-	Status       HostStatus
+	Owner      string
+	ID         string
+	Name       string
+	NetworkID  string
+	Role       string
+	IPAddress  string
+	PublicIP   string
+	Port       int
+	CreatedAt  int64
+	LastSeenAt int64
+	EnrollAt   int64
+	Status     HostStatus
 
 	Tags map[string]interface{}
 
 	// Config 主机的配置文件
-	Config config.Config
+	Config config.HostConfig
 }
 
 // HostStatus 是主机的状态枚举类型。
@@ -76,6 +74,8 @@ type EnrollHost struct {
 
 // HostFindOptions 定义了查询主机数据时的过滤和排序选项
 type HostFindOptions struct {
+	UserID string
+
 	// 可以添加各种过滤条件,如按名称、IP、标签等进行过滤
 	Filters map[string]interface{}
 
@@ -86,11 +86,10 @@ type HostFindOptions struct {
 	Limit  int
 	Offset int
 
-	NetworkID    string
-	IPAddress    string
-	Role         string
-	Name         string
-	IsLighthouse bool
+	NetworkID string
+	IPAddress string
+	Role      string
+	Name      string
 }
 
 type ListHostRuleOptions struct {

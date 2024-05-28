@@ -7,12 +7,11 @@ type Host struct {
 	Name                string                 `bson:"name"`
 	NetworkID           string                 `bson:"network_id"`
 	IPAddress           string                 `bson:"ip_address"`
+	PublicIP            string                 `bson:"public_ip"`
 	Role                string                 `bson:"role"`
 	EnrollCode          string                 `bson:"enroll_code"`
 	Owner               string                 `bson:"owner"`
 	Port                int                    `bson:"port"`
-	IsLighthouse        bool                   `bson:"is_lighthouse"`
-	StaticAddresses     []string               `bson:"static_addresses"`
 	Tags                map[string]interface{} `bson:"tags"`
 	CreatedAt           int64                  `bson:"created_at"`
 	UpdatedAt           int64                  `bson:"updated_at"`
@@ -21,5 +20,5 @@ type Host struct {
 	EnrollAt            int64                  `bson:"enroll_at"`
 	EnrollCodeExpiredAt int64                  `bson:"enroll_code_expired_at"`
 	Status              int8                   `bson:"status"`
-	Config              config.Config          `bson:"Config"`
+	Config              config.HostConfig      `bson:"config"`
 }
