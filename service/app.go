@@ -35,9 +35,12 @@ func NewApplication(ctx context.Context, cfg *config.Config, logger *logrus.Logg
 		ExpiryDuration: cfg.Http.JWT.Expiry,
 	}
 
-	emailClient, err := email.NewEmailClient(cfg.Email.Host, cfg.Email.Port, cfg.Email.Username, cfg.Email.Password)
-	if err != nil {
-		panic(err)
+	var emailClient *email.EmailClient
+	if cfg.Email.Enable {
+		emailClient, err = email.NewEmailClient(cfg.Email.Host, cfg.Email.Port, cfg.Email.Username, cfg.Email.Password)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	repos := persistence.NewRepositories(mongodbConn, cfg.Persistence.DB)

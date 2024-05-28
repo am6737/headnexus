@@ -1,1 +1,1 @@
-db.createUser({ user: "root", pwd: "123456", roles: [{ role: "root", db: "admin" }] });
+db.createUser({ user: "root", pwd: "root", roles: [{ role: "root", db: "admin" }] });

@@ -37,10 +37,13 @@ func (h *UserHandler) SendCode(ctx context.Context, email string) error {
 	}
 
 	//todo 优化激活邮件链接的前缀
-	if err := h.emailClient.SendEmail(email, "激活账号", getEmailTemplate(fmt.Sprintf("%s://%s", "http", h.httpConfig.Addr), email, code)); err != nil {
-		fmt.Println("4", err)
-		return err
+	if h.emailClient != nil {
+		if err := h.emailClient.SendEmail(email, "激活账号", getEmailTemplate(fmt.Sprintf("%s://%s", "http", h.httpConfig.Addr), email, code)); err != nil {
+			fmt.Println("4", err)
+			return err
+		}
 	}
+
 	return nil
 }
 

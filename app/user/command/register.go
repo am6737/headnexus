@@ -49,9 +49,12 @@ func (h *UserHandler) Register(ctx context.Context, cmd *user.CreateUser) (*enti
 	}
 
 	//todo 优化激活邮件链接的前缀
-	if err := h.emailClient.SendEmail(cmd.Email, "激活账号", getEmailTemplate(fmt.Sprintf("%s://%s", "http", h.httpConfig.Addr), cmd.Email, code)); err != nil {
-		fmt.Println("4", err)
-		return nil, err
+	if h.emailClient != nil {
+		if err := h.emailClient.SendEmail(cmd.Email, "激活账号", getEmailTemplate(fmt.Sprintf("%s://%s", "http", h.httpConfig.Addr), cmd.Email, code)); err != nil {
+			fmt.Println("4", err)
+			return nil, err
+		}
 	}
+
 	return create, nil
 }
