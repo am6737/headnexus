@@ -5,12 +5,13 @@ persistence:
   type: "mongodb"
   db: "nexus"
 http:
-  addr: 0.0.0.0:7777
+  addr: :7777
+  server: "<server-ip>:7777"
   jwt:
     secret: ""
     expire: "72h"
 email:
-  enabled: false
+  enable: false
   host: ""
   port:
   username: ""

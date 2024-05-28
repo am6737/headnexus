@@ -603,13 +603,32 @@ paths:
       tags:
         - user
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterRequest'
+              type: object
+              required:
+                  - email
+                  - password
+                  - confirm_password
+              properties:
+                name:
+                  type: string
+                  description: 用户名
+                email:
+                  type: string
+                  format: email
+                  example: 123@qq.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+                confirm_password:
+                  type: string
+                  format: password
+                  example: password123
       responses:
-        '204':
+        '200':
           description: Successful response
   /api/v1/users/verify-code:
     get:
@@ -1124,20 +1143,6 @@ components:
           type: string
           format: email
           example: user@example.com
-        password:
-          type: string
-          format: password
-          example: password123
-    RegisterRequest:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          example: 123@qq.com
-        name:
-          type: string
-          example: name
         password:
           type: string
           format: password

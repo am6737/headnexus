@@ -36,7 +36,7 @@ type HttpHandler struct {
 func (h *HttpHandler) Start(ctx context.Context) error {
 	// This is how you set up a basic gin router
 	r := gin.Default()
-	r.Use(middleware.RecoveryMiddleware(), middleware.CORSMiddleware())
+	r.Use(middleware.CORSMiddleware(), middleware.RecoveryMiddleware())
 
 	swagger, err := v1.GetSwagger()
 	if err != nil {

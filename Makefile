@@ -5,6 +5,7 @@ IMG ?= ${REGISTRY}/${SERVICE}:${TAG}
 DOCKER_BUILD_PATH ?= "cmd/main.go"
 PLATFORMS ?= linux/amd64
 
+GOPROXY ?= https://goproxy.cn
 # 防止命令行参数被误认为是目标
 %:
 	@:

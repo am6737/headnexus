@@ -225,13 +225,6 @@ type Network struct {
 	Name string `json:"name"`
 }
 
-// RegisterRequest defines model for RegisterRequest.
-type RegisterRequest struct {
-	Email    *openapi_types.Email `json:"email,omitempty"`
-	Name     *string              `json:"name,omitempty"`
-	Password *string              `json:"password,omitempty"`
-}
-
 // Rule defines model for Rule.
 type Rule struct {
 	Action      RuleAction `json:"action"`
@@ -359,6 +352,16 @@ type ListRuleParams struct {
 	RuleFindOptions *RuleFindOptions `form:"ruleFindOptions,omitempty" json:"ruleFindOptions,omitempty"`
 }
 
+// RegisterUserJSONBody defines parameters for RegisterUser.
+type RegisterUserJSONBody struct {
+	ConfirmPassword string              `json:"confirm_password"`
+	Email           openapi_types.Email `json:"email"`
+
+	// Name 用户名
+	Name     *string `json:"name,omitempty"`
+	Password string  `json:"password"`
+}
+
 // VerifyCodeParams defines parameters for VerifyCode.
 type VerifyCodeParams struct {
 	// Email User email address
@@ -396,7 +399,7 @@ type ChangePasswordJSONRequestBody = ChangePasswordRequest
 type LoginUserJSONRequestBody = LoginRequest
 
 // RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.
-type RegisterUserJSONRequestBody = RegisterRequest
+type RegisterUserJSONRequestBody RegisterUserJSONBody
 
 // SendCodeJSONRequestBody defines body for SendCode for application/json ContentType.
 type SendCodeJSONRequestBody = SendCodeRequest

@@ -111,9 +111,14 @@ func (h *HttpHandler) LoginUser(c *gin.Context) {
 }
 
 func (h *HttpHandler) RegisterUser(c *gin.Context) {
-	req := &v1.RegisterRequest{}
+	req := &v1.RegisterUserJSONRequestBody{}
 	if err := c.ShouldBindJSON(req); err != nil {
 		http.FailedResponse(c, "参数错误")
+		return
+	}
+
+	if req.Password != req.ConfirmPassword {
+		http.FailedResponse(c, "密码不一致")
 		return
 	}
 
@@ -134,7 +139,7 @@ func (h *HttpHandler) RegisterUser(c *gin.Context) {
 	_, err = h.app.User.Commands.Handler.Register(c, &user.CreateUser{
 		Name:     name,
 		Email:    newemail,
-		Password: *req.Password,
+		Password: req.Password,
 	})
 	if err != nil {
 		http.FailedResponse(c, err.Error())

@@ -65,8 +65,9 @@ type TunConfig struct {
 }
 
 type HttpConfig struct {
-	Addr string    `yaml:"addr"`
-	JWT  JwtConfig `yaml:"jwt"`
+	Addr   string    `yaml:"addr"`
+	Server string    `yaml:"server"`
+	JWT    JwtConfig `yaml:"jwt"`
 }
 
 type EmailConfig struct {
