@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	ctime "github.com/am6737/headnexus/common/time"
+	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/infra/persistence"
 	"github.com/am6737/headnexus/pkg/decorator"
@@ -52,6 +53,11 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 		return nil, err
 	}
 
+	host, err := h.repos.HostRepo.Get(ctx, cmd.HostID)
+	if err != nil {
+		return nil, err
+	}
+
 	var rules []*entity.HostRule
 	for _, ruleID := range cmd.Rules {
 		rule, err := h.repos.RuleRepo.Get(ctx, cmd.UserID, ruleID)
@@ -72,6 +78,29 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 			Action:      rule.Action,
 			Host:        rule.Host,
 		})
+
+		if rule.Type == entity.RuleTypeOutbound {
+			host.Config.Outbound = append(host.Config.Outbound, config.OutboundRule{
+				Port:   rule.Port,
+				Proto:  rule.Proto.String(),
+				Host:   rule.Host,
+				Action: rule.Action.String(),
+			})
+		}
+		if rule.Type == entity.RuleTypeInbound {
+			host.Config.Inbound = append(host.Config.Inbound, config.InboundRule{
+				Port:   rule.Port,
+				Proto:  rule.Proto.String(),
+				Host:   rule.Host,
+				Action: rule.Action.String(),
+			})
+		}
+	}
+
+	_, err = h.repos.HostRepo.Update(ctx, host)
+	if err != nil {
+		h.logger.WithError(err).Error("update host failed")
+		return nil, err
 	}
 
 	return rules, nil

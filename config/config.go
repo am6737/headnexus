@@ -182,6 +182,13 @@ var (
 		LocalAllowList: LocalAllowList{Interfaces: make(map[string]bool)},
 	}
 
+	defaultHostLighthouse = LighthouseConfig{
+		Enabled:        false,
+		Interval:       60,
+		Hosts:          nil,
+		LocalAllowList: LocalAllowList{Interfaces: make(map[string]bool)},
+	}
+
 	defaultOutbound = []OutboundRule{
 		{
 			Port:   "any",
@@ -234,7 +241,7 @@ func GenerateLighthouseConfigTemplate() HostConfig {
 func GenerateConfigTemplate() HostConfig {
 	return HostConfig{
 		StaticHostMap: make(map[string][]string),
-		Lighthouse:    defaultLighthouse,
+		Lighthouse:    defaultHostLighthouse,
 		Listen:        defaultListen,
 		Tun:           defaultTun,
 		Handshake:     defaultHandshake,
