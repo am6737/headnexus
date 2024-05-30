@@ -1,6 +1,7 @@
 package ports
 
 import (
+	"fmt"
 	"strings"
 
 	v1 "github.com/am6737/headnexus/api/http/v1"
@@ -42,6 +43,14 @@ func (h *HttpHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("req.NewPassword => ", req.NewPassword)
+	fmt.Println("req.ConfirmPassword => ", req.ConfirmPassword)
+
+	if req.NewPassword != req.ConfirmPassword {
+		http.FailedResponse(c, "密码不一致")
+		return
+	}
+
 	// 从上下文中获取用户信息
 	id, ok := c.Get("user_id")
 	if !ok {
@@ -51,7 +60,7 @@ func (h *HttpHandler) ChangePassword(c *gin.Context) {
 
 	userID := id.(string)
 
-	password := pkgstring.Md5(*req.OldPassword)
+	password := pkgstring.Md5(req.OldPassword)
 	userInfo, err := h.app.User.Queries.Handler.Get(c, &user.GetUser{
 		ID: userID,
 	})
@@ -59,12 +68,15 @@ func (h *HttpHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(" userInfo.Password => ", userInfo.Password)
+	fmt.Println("password => ", password)
+
 	if userInfo.Password != password {
 		http.FailedResponse(c, "旧密码错误")
 		return
 	}
 
-	userInfo.Password = pkgstring.Md5(*req.NewPassword)
+	userInfo.Password = pkgstring.Md5(req.NewPassword)
 
 	_, err = h.app.User.Commands.Handler.Update(c, &user.UpdateUser{
 		ID:           userInfo.ID,
@@ -99,7 +111,7 @@ func (h *HttpHandler) LoginUser(c *gin.Context) {
 	// 去除双引号
 	newemail := strings.Trim(string(email), "\"")
 
-	token, err := h.app.User.Commands.Handler.Login(c, newemail, *req.Password)
+	token, info, err := h.app.User.Commands.Handler.Login(c, newemail, *req.Password)
 	if err != nil {
 		http.FailedResponse(c, err.Error())
 		return
@@ -107,6 +119,11 @@ func (h *HttpHandler) LoginUser(c *gin.Context) {
 
 	http.SuccessResponse(c, "登录成功", gin.H{
 		"token": token,
+		"user_info": &v1.UserInfo{
+			Email:       info.Email,
+			Id:          info.ID,
+			LastLoginAt: ctime.FormatTimeSince(info.LastLoginAt),
+		},
 	})
 }
 

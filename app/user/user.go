@@ -50,7 +50,7 @@ type CommandHandler interface {
 	Delete(ctx context.Context, cmd *DeleteUser) error
 	Update(ctx context.Context, cmd *UpdateUser) (*entity.User, error)
 	Register(ctx context.Context, cmd *CreateUser) (*entity.User, error)
-	Login(ctx context.Context, email string, password string) (string, error)
+	Login(ctx context.Context, email string, password string) (string, *entity.User, error)
 	Verify(ctx context.Context, email, code string) error
 	SendCode(ctx context.Context, email string) error
 }

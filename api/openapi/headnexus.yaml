@@ -596,6 +596,8 @@ paths:
                 properties:
                   token:
                     type: string
+                  user_info:
+                    $ref: '#/components/schemas/UserInfo'
   /api/v1/users/register:
     post:
       summary: 用户注册
@@ -1149,11 +1151,19 @@ components:
           example: password123
     ChangePasswordRequest:
       type: object
+      required:
+        - old_password
+        - new_password
+        - confirm_password
       properties:
         old_password:
           type: string
           example: old_password123
         new_password:
+          type: string
+          format: password
+          example: new_password123
+        confirm_password:
           type: string
           format: password
           example: new_password123

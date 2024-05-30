@@ -71,8 +71,9 @@ const (
 
 // ChangePasswordRequest defines model for ChangePasswordRequest.
 type ChangePasswordRequest struct {
-	NewPassword *string `json:"new_password,omitempty"`
-	OldPassword *string `json:"old_password,omitempty"`
+	ConfirmPassword string `json:"confirm_password"`
+	NewPassword     string `json:"new_password"`
+	OldPassword     string `json:"old_password"`
 }
 
 // CheckEnrollCodeResponse defines model for CheckEnrollCodeResponse.

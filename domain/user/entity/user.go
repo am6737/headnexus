@@ -14,7 +14,7 @@ type User struct {
 
 // 去除敏感信息
 func (u *User) Info() *User {
-	u.Password = ""
+	//u.Password = ""
 	u.Token = ""
 	return u
 }
