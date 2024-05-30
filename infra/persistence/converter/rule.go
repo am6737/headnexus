@@ -8,6 +8,7 @@ import (
 func RuleEntityToPO(e *entity.Rule) *po.Rule {
 	m := &po.Rule{}
 	m.ID = e.ID
+	m.Type = uint8(e.Type)
 	m.Name = e.Name
 	m.Description = e.Description
 	m.Port = e.Port

@@ -185,7 +185,7 @@ var (
 	defaultOutbound = []OutboundRule{
 		{
 			Port:   "any",
-			Proto:  "icmp",
+			Proto:  "any",
 			Host:   nil,
 			Action: "allow",
 		},
@@ -238,7 +238,7 @@ func GenerateConfigTemplate() HostConfig {
 		Listen:        defaultListen,
 		Tun:           defaultTun,
 		Handshake:     defaultHandshake,
-		//Outbound:      defaultOutbound,
+		Outbound:      defaultOutbound,
 		//Inbound:       defaultInbound,
 	}
 }

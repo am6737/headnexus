@@ -1,6 +1,7 @@
 package ports
 
 import (
+	"fmt"
 	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app/rule"
 	"github.com/am6737/headnexus/domain/host/entity"
@@ -53,6 +54,8 @@ func (h *HttpHandler) CreateRule(c *gin.Context) {
 		http.FailedResponse(c, "参数错误")
 		return
 	}
+
+	fmt.Println("CreateRule req => ", req.Type)
 
 	createRule, err := h.app.Rule.Commands.Handler.Create(c, &rule.CreateRule{
 		UserID:      c.Value("user_id").(string),

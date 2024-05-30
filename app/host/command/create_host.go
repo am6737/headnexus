@@ -113,8 +113,19 @@ func (h *createHostHandler) Handle(ctx context.Context, cmd *CreateHost) (*entit
 					Action: rule.Action.String(),
 				})
 			}
+			if rule.Type == entity.RuleTypeOutbound {
+				hc.Outbound = append(hc.Outbound, config.OutboundRule{
+					Port:   rule.Port,
+					Proto:  rule.Proto.String(),
+					Host:   rule.Host,
+					Action: rule.Action.String(),
+				})
+			}
 		}
 	}
+
+	fmt.Println("hc.Inbound => ", hc.Inbound)
+	fmt.Println("hc.Outbound => ", hc.Outbound)
 
 	hc.Listen.Port = cmd.Port
 	hc.Tun.IP = cmd.IPAddress
