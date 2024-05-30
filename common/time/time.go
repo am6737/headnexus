@@ -24,7 +24,7 @@ func FormatTimeSince(timestamp int64) string {
 	}
 
 	now := time.Now()
-	t := time.Unix(timestamp, 0)
+	t := time.Unix(timestamp/1000, 0)
 	diff := now.Sub(t)
 
 	// 根据时间差的大小选择合适的格式化方式
