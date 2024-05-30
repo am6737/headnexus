@@ -7,7 +7,7 @@ import (
 
 func TestFormatTimestamp(t *testing.T) {
 	// 测试时间戳为0的情况
-	result := FormatTimestamp(0)
+	result := FormatTimeSince(0)
 	if result != "" {
 		t.Errorf("Expected empty string, but got %s", result)
 	}
@@ -47,21 +47,21 @@ func TestFormatTimeSince(t *testing.T) {
 	now := time.Now()
 
 	// 测试1分钟前的情况
-	oneMinuteAgo := now.Add(-1 * time.Minute).Unix()
+	oneMinuteAgo := now.Add(-1*time.Minute).Unix() * 1000
 	result := FormatTimeSince(oneMinuteAgo)
 	if result != "1分钟前" {
 		t.Errorf("Expected 1分钟前, but got %s", result)
 	}
 
 	// 测试1小时前的情况
-	oneHourAgo := now.Add(-1 * time.Hour).Unix()
+	oneHourAgo := now.Add(-1*time.Hour).Unix() * 1000
 	result = FormatTimeSince(oneHourAgo)
 	if result != "1小时前" {
 		t.Errorf("Expected 1小时前, but got %s", result)
 	}
 
 	// 测试1天前的情况
-	oneDayAgo := now.Add(-24 * time.Hour).Unix()
+	oneDayAgo := now.Add(-24*time.Hour).Unix() * 1000
 	expected := now.Add(-24 * time.Hour).Format("2006-01-02 15:04:05")
 	result = FormatTimeSince(oneDayAgo)
 	if result != expected {
@@ -69,7 +69,7 @@ func TestFormatTimeSince(t *testing.T) {
 	}
 
 	// 测试超过1天前的情况
-	olderTime := time.Date(2024, time.May, 1, 10, 0, 0, 0, now.Location()).Unix()
+	olderTime := time.Date(2024, time.May, 1, 10, 0, 0, 0, now.Location()).Unix() * 1000
 	expected = "2024-05-01 10:00:00"
 	result = FormatTimeSince(olderTime)
 	if result != expected {
