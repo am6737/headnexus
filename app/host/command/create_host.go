@@ -127,6 +127,10 @@ func (h *createHostHandler) Handle(ctx context.Context, cmd *CreateHost) (*entit
 	fmt.Println("hc.Inbound => ", hc.Inbound)
 	fmt.Println("hc.Outbound => ", hc.Outbound)
 
+	if cmd.Port == 0 {
+		cmd.Port = 6976
+	}
+
 	hc.Listen.Port = cmd.Port
 	hc.Tun.IP = cmd.IPAddress
 	hc.Tun.Mask = net.Mask()
