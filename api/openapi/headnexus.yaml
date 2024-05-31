@@ -328,7 +328,7 @@ paths:
                 $ref: '#/components/schemas/Host'
     put:
       operationId: updateHost
-      summary: Update a host
+      summary: 更新主机
       tags:
         - host
       security:
@@ -343,7 +343,28 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Host'
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 主机名称
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                ip_address:
+                  type: string
+                  description: 主机IP
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                public_ip:
+                  type: string
+                  description: 公网IP
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
+                port:
+                  type: integer
+                  description: 主机端口
+                  x-omitempty: false
+                  x-go-type-skip-optional-pointer: true
       responses:
         '200':
           description: Successful response

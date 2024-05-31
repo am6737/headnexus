@@ -1,7 +1,6 @@
 package ports
 
 import (
-	"fmt"
 	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/app/host/command"
 	"github.com/am6737/headnexus/app/host/query"
@@ -174,8 +173,6 @@ func (h *HttpHandler) ListHost(c *gin.Context, params v1.ListHostParams) {
 		return
 	}
 
-	fmt.Println("params.FindOptions.Role => ", params.FindOptions.Role)
-
 	hosts, err := h.app.Host.Queries.FindHost.Handle(c, &query.FindHost{
 		UserID: c.GetString("user_id"),
 		//Filters:      params.FindOptions.Filters,
@@ -216,7 +213,6 @@ func convertApiNetworkToShortHost(h *query.Host) *v1.ShortHost {
 func (h *HttpHandler) CreateHost(c *gin.Context) {
 	req := &v1.CreateHostJSONRequestBody{}
 	if err := c.ShouldBindJSON(req); err != nil {
-		fmt.Printf("create host error: %v", err)
 		http.FailedResponse(c, "参数错误")
 		return
 	}
@@ -284,26 +280,25 @@ func convertApiNetworkToHost(h *entity.Host) *v1.Host {
 }
 
 func (h *HttpHandler) UpdateHost(c *gin.Context, hostId string) {
-	req := &v1.Host{}
+	req := &v1.UpdateHostJSONRequestBody{}
 	if err := c.ShouldBindJSON(req); err != nil {
 		http.FailedResponse(c, "参数错误")
 		return
 	}
 
 	updatedHost, err := h.app.Host.Commands.UpdateHost.Handle(c, &command.UpdateHost{
-		ID:              hostId,
-		Name:            req.Name,
-		NetworkID:       req.NetworkId,
-		IPAddress:       req.IpAddress,
-		Role:            string(req.Role),
-		Port:            req.Port,
-		StaticAddresses: req.StaticAddresses,
-		Tags:            req.Tags,
+		UserID:    c.GetString("user_id"),
+		HostID:    hostId,
+		Name:      req.Name,
+		IPAddress: req.IpAddress,
+		PublicIP:  req.PublicIp,
+		Port:      req.Port,
 	})
 	if err != nil {
 		http.FailedResponse(c, err.Error())
 		return
 	}
+
 	http.SuccessResponse(c, "更新主机成功", updatedHost)
 }
 

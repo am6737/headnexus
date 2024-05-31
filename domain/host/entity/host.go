@@ -4,6 +4,14 @@ import (
 	"github.com/am6737/headnexus/config"
 )
 
+type UpdateHost struct {
+	ID        string
+	Name      *string
+	IPAddress *string
+	PublicIP  *string
+	Port      *int
+}
+
 // Host 表示一个主机
 type Host struct {
 	Owner      string

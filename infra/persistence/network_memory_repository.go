@@ -6,6 +6,7 @@ import (
 	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/network/entity"
 	"github.com/am6737/headnexus/domain/network/repository"
+	net2 "github.com/am6737/headnexus/pkg/net"
 	"net"
 	"sort"
 	"sync"
@@ -122,7 +123,7 @@ func (m *NetworkMemoryRepository) AllocateIP(ctx context.Context, id string, ip 
 		return ErrorNetworkNotFound
 	}
 
-	if !isIPInCIDR(ip, network.Cidr) {
+	if !net2.IsIPInCIDR(ip, network.Cidr) {
 		return ErrorAddressNotInCIDRRange
 	}
 
@@ -153,7 +154,7 @@ func (m *NetworkMemoryRepository) ReleaseIP(ctx context.Context, id string, ip s
 		return ErrorNetworkNotFound
 	}
 
-	if !isIPInCIDR(ip, network.Cidr) {
+	if !net2.IsIPInCIDR(ip, network.Cidr) {
 		return ErrorAddressNotInCIDRRange
 	}
 
@@ -389,18 +390,4 @@ func inc(ip net.IP) {
 			break
 		}
 	}
-}
-
-func isIPInCIDR(ipStr string, cidr string) bool {
-	_, network, err := net.ParseCIDR(cidr)
-	if err != nil {
-		return false
-	}
-	// 尝试解析字符串为net.IP类型
-	ip := net.ParseIP(ipStr)
-	if ip == nil {
-		return false
-	}
-
-	return network.Contains(ip)
 }

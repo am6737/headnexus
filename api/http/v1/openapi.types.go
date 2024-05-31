@@ -328,6 +328,21 @@ type CreateHostJSONBody struct {
 // CreateHostJSONBodyRole defines parameters for CreateHost.
 type CreateHostJSONBodyRole string
 
+// UpdateHostJSONBody defines parameters for UpdateHost.
+type UpdateHostJSONBody struct {
+	// IpAddress 主机IP
+	IpAddress string `json:"ip_address"`
+
+	// Name 主机名称
+	Name string `json:"name"`
+
+	// Port 主机端口
+	Port int `json:"port"`
+
+	// PublicIp 公网IP
+	PublicIp string `json:"public_ip"`
+}
+
 // CheckEnrollCodeJSONBody defines parameters for CheckEnrollCode.
 type CheckEnrollCodeJSONBody struct {
 	Code string `json:"code"`
@@ -376,7 +391,7 @@ type VerifyCodeParams struct {
 type CreateHostJSONRequestBody CreateHostJSONBody
 
 // UpdateHostJSONRequestBody defines body for UpdateHost for application/json ContentType.
-type UpdateHostJSONRequestBody = Host
+type UpdateHostJSONRequestBody UpdateHostJSONBody
 
 // CheckEnrollCodeJSONRequestBody defines body for CheckEnrollCode for application/json ContentType.
 type CheckEnrollCodeJSONRequestBody CheckEnrollCodeJSONBody

@@ -3,7 +3,6 @@ package persistence
 import (
 	"context"
 	"errors"
-	"fmt"
 	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/domain/host/repository"
@@ -285,8 +284,6 @@ func (h *HostMongodbRepository) Find(ctx context.Context, options *entity.HostFi
 	if options.Name != "" {
 		filter["name"] = options.Name
 	}
-
-	fmt.Println("filter:", filter)
 
 	cursor, err := h.collection.Find(ctx, filter, ToFindOptions(options))
 	if err != nil {

@@ -34,3 +34,17 @@ func GenerateMask(cidr string) (string, error) {
 	mask := net.IP(maskBytes)
 	return mask.String(), nil
 }
+
+func IsIPInCIDR(ipStr string, cidr string) bool {
+	_, network, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return false
+	}
+	// 尝试解析字符串为net.IP类型
+	ip := net.ParseIP(ipStr)
+	if ip == nil {
+		return false
+	}
+
+	return network.Contains(ip)
+}

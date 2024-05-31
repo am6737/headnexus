@@ -8,6 +8,7 @@ import (
 	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/network/entity"
 	"github.com/am6737/headnexus/infra/persistence/po"
+	net2 "github.com/am6737/headnexus/pkg/net"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -98,7 +99,7 @@ func (m *MongoDBRepository) AutoAllocateIP(ctx context.Context, id string) (stri
 		}
 
 		// 检查新的IP地址是否超过了当前子网的范围
-		if !isIPInCIDR(ip.String(), network.Cidr) {
+		if !net2.IsIPInCIDR(ip.String(), network.Cidr) {
 			return "", ErrorAddressNotInCIDRRange
 		}
 
@@ -204,7 +205,7 @@ func (m *MongoDBRepository) AllocateIP(ctx context.Context, id string, ip string
 		return err
 	}
 
-	if !isIPInCIDR(ip, network.Cidr) {
+	if !net2.IsIPInCIDR(ip, network.Cidr) {
 		return ErrorAddressNotInCIDRRange
 	}
 
@@ -237,7 +238,7 @@ func (m *MongoDBRepository) ReleaseIP(ctx context.Context, id string, ip string)
 		return err
 	}
 
-	if !isIPInCIDR(ip, network.Cidr) {
+	if !net2.IsIPInCIDR(ip, network.Cidr) {
 		return ErrorAddressNotInCIDRRange
 	}
 

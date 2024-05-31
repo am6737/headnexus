@@ -2,7 +2,6 @@ package query
 
 import (
 	"context"
-	"fmt"
 	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/infra/persistence"
@@ -41,7 +40,6 @@ type findHostHandler struct {
 }
 
 func (h *findHostHandler) Handle(ctx context.Context, query *FindHost) ([]*Host, error) {
-	fmt.Println(" query.Role ", query.Role)
 
 	if query.Role == "" {
 		query.Role = "none"
