@@ -231,12 +231,14 @@ type Rule struct {
 	Action      RuleAction `json:"action"`
 	CreatedAt   int        `json:"created_at"`
 	Description string     `json:"description"`
-	Host        []string   `json:"host"`
-	Id          string     `json:"id"`
-	Name        string     `json:"name"`
-	Port        string     `json:"port"`
-	Proto       RuleProto  `json:"proto"`
-	Type        RuleType   `json:"type"`
+
+	// Host 源地址
+	Host  string    `json:"host"`
+	Id    string    `json:"id"`
+	Name  string    `json:"name"`
+	Port  string    `json:"port"`
+	Proto RuleProto `json:"proto"`
+	Type  RuleType  `json:"type"`
 }
 
 // RuleAction defines model for Rule.Action.

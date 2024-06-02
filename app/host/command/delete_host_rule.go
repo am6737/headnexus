@@ -9,6 +9,7 @@ import (
 	"github.com/am6737/headnexus/pkg/code"
 	"github.com/am6737/headnexus/pkg/decorator"
 	"github.com/sirupsen/logrus"
+	"strings"
 )
 
 type DeleteHostRule struct {
@@ -66,7 +67,7 @@ func (h *deleteHostRuleHandler) Handle(ctx context.Context, cmd *DeleteHostRule)
 			host.Config.Outbound = append(host.Config.Outbound, config.OutboundRule{
 				Port:   rule.Port,
 				Proto:  rule.Proto.String(),
-				Host:   rule.Host,
+				Host:   strings.Split(rule.Host, ","),
 				Action: rule.Action.String(),
 			})
 		}
@@ -74,7 +75,7 @@ func (h *deleteHostRuleHandler) Handle(ctx context.Context, cmd *DeleteHostRule)
 			host.Config.Inbound = append(host.Config.Inbound, config.InboundRule{
 				Port:   rule.Port,
 				Proto:  rule.Proto.String(),
-				Host:   rule.Host,
+				Host:   strings.Split(rule.Host, ","),
 				Action: rule.Action.String(),
 			})
 		}

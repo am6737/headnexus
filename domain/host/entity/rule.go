@@ -12,7 +12,7 @@ type Rule struct {
 	Port        string
 	Proto       RuleProto
 	Action      RuleAction
-	Host        []string
+	Host        string
 }
 
 type RuleType uint8

@@ -9,6 +9,7 @@ import (
 	"github.com/am6737/headnexus/infra/persistence"
 	"github.com/am6737/headnexus/pkg/decorator"
 	"github.com/sirupsen/logrus"
+	"strings"
 )
 
 type AddHostRule struct {
@@ -42,25 +43,27 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 
 	// TODO 判断用户权限
 
-	r, err := h.repos.HostRepo.Get(ctx, cmd.HostID)
-	if err != nil {
-		h.logger.Error("error getting host")
-		return nil, err
-	}
-
-	if err := h.repos.HostRuleRepo.AddHostRule(ctx, r.ID, cmd.Rules...); err != nil {
-		h.logger.WithError(err).Error("add host rule failed")
-		return nil, err
-	}
-
 	host, err := h.repos.HostRepo.Get(ctx, cmd.HostID)
 	if err != nil {
 		return nil, err
 	}
 
+	if err := h.repos.HostRuleRepo.AddHostRule(ctx, host.ID, cmd.Rules...); err != nil {
+		h.logger.WithError(err).Error("add host rule failed")
+		return nil, err
+	}
+
+	hostRules, err := h.repos.HostRuleRepo.ListHostRule(ctx, &entity.ListHostRuleOptions{
+		HostID: host.ID,
+	})
+	if err != nil {
+		h.logger.WithError(err).Error("list host rule failed")
+		return nil, err
+	}
+
 	var rules []*entity.HostRule
-	for _, ruleID := range cmd.Rules {
-		rule, err := h.repos.RuleRepo.Get(ctx, cmd.UserID, ruleID)
+	for _, v := range hostRules {
+		rule, err := h.repos.RuleRepo.Get(ctx, cmd.UserID, v.RuleID)
 		if err != nil {
 			h.logger.WithError(err).Error("get host rule failed")
 			return nil, err
@@ -76,14 +79,14 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 			Port:        rule.Port,
 			Proto:       rule.Proto,
 			Action:      rule.Action,
-			Host:        rule.Host,
+			Host:        strings.Split(rule.Host, ","),
 		})
 
 		if rule.Type == entity.RuleTypeOutbound {
 			host.Config.Outbound = append(host.Config.Outbound, config.OutboundRule{
 				Port:   rule.Port,
 				Proto:  rule.Proto.String(),
-				Host:   rule.Host,
+				Host:   strings.Split(rule.Host, ","),
 				Action: rule.Action.String(),
 			})
 		}
@@ -91,7 +94,7 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 			host.Config.Inbound = append(host.Config.Inbound, config.InboundRule{
 				Port:   rule.Port,
 				Proto:  rule.Proto.String(),
-				Host:   rule.Host,
+				Host:   strings.Split(rule.Host, ","),
 				Action: rule.Action.String(),
 			})
 		}

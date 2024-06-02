@@ -193,7 +193,7 @@ var (
 		{
 			Port:   "any",
 			Proto:  "any",
-			Host:   nil,
+			Host:   []string{"0.0.0.0/0"},
 			Action: "allow",
 		},
 	}
@@ -211,7 +211,7 @@ var (
 		{
 			Port:   "any",
 			Proto:  "any",
-			Host:   nil,
+			Host:   []string{"0.0.0.0/0"},
 			Action: "allow",
 		},
 	}
@@ -219,7 +219,7 @@ var (
 		{
 			Port:   "any",
 			Proto:  "any",
-			Host:   nil,
+			Host:   []string{"0.0.0.0/0"},
 			Action: "allow",
 		},
 	}

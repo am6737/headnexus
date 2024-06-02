@@ -7,6 +7,7 @@ import (
 	"github.com/am6737/headnexus/infra/persistence"
 	"github.com/am6737/headnexus/pkg/decorator"
 	"github.com/sirupsen/logrus"
+	"strings"
 )
 
 type ListHostRules struct {
@@ -64,7 +65,7 @@ func (h *listHostRulesHandler) Handle(ctx context.Context, query *ListHostRules)
 			Port:        rule.Port,
 			Proto:       rule.Proto,
 			Action:      rule.Action,
-			Host:        rule.Host,
+			Host:        strings.Split(rule.Host, ","),
 		})
 	}
 

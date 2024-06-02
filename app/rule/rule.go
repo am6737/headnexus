@@ -27,7 +27,7 @@ type CreateRule struct {
 	Description string
 	Port        string
 	Proto       string
-	Host        []string
+	Host        string
 }
 
 type DeleteRule struct {
@@ -43,7 +43,7 @@ type UpdateRule struct {
 	Port        string
 	Proto       string
 	Action      string
-	Host        []string
+	Host        string
 }
 
 type CommandHandler interface {

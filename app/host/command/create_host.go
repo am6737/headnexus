@@ -12,6 +12,7 @@ import (
 	"github.com/segmentio/ksuid"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
+	"strings"
 )
 
 type CreateHost struct {
@@ -109,7 +110,7 @@ func (h *createHostHandler) Handle(ctx context.Context, cmd *CreateHost) (*entit
 				hc.Inbound = append(hc.Inbound, config.InboundRule{
 					Port:   rule.Port,
 					Proto:  rule.Proto.String(),
-					Host:   rule.Host,
+					Host:   strings.Split(rule.Host, ","),
 					Action: rule.Action.String(),
 				})
 			}
@@ -117,7 +118,7 @@ func (h *createHostHandler) Handle(ctx context.Context, cmd *CreateHost) (*entit
 				hc.Outbound = append(hc.Outbound, config.OutboundRule{
 					Port:   rule.Port,
 					Proto:  rule.Proto.String(),
-					Host:   rule.Host,
+					Host:   strings.Split(rule.Host, ","),
 					Action: rule.Action.String(),
 				})
 			}
