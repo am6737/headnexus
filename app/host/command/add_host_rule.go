@@ -81,7 +81,6 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 			Action:      rule.Action,
 			Host:        strings.Split(rule.Host, ","),
 		})
-
 		if rule.Type == entity.RuleTypeOutbound {
 			host.Config.Outbound = append(host.Config.Outbound, config.OutboundRule{
 				Port:   rule.Port,

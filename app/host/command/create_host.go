@@ -3,7 +3,6 @@ package command
 import (
 	"context"
 	"errors"
-	"fmt"
 	v1 "github.com/am6737/headnexus/api/http/v1"
 	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/domain/host/entity"
@@ -11,7 +10,6 @@ import (
 	"github.com/am6737/headnexus/pkg/decorator"
 	"github.com/segmentio/ksuid"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
 	"strings"
 )
 
@@ -125,9 +123,6 @@ func (h *createHostHandler) Handle(ctx context.Context, cmd *CreateHost) (*entit
 		}
 	}
 
-	fmt.Println("hc.Inbound => ", hc.Inbound)
-	fmt.Println("hc.Outbound => ", hc.Outbound)
-
 	if cmd.Port == 0 {
 		cmd.Port = 6976
 	}
@@ -135,16 +130,6 @@ func (h *createHostHandler) Handle(ctx context.Context, cmd *CreateHost) (*entit
 	hc.Listen.Port = cmd.Port
 	hc.Tun.IP = cmd.IPAddress
 	hc.Tun.Mask = net.Mask()
-
-	yamlData, err := yaml.Marshal(&hc)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
-
-	fmt.Println("----------------")
-	fmt.Println(string(yamlData))
-	fmt.Println("----------------")
 
 	e := &entity.Host{
 		Owner:     cmd.UserID,

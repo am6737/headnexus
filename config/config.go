@@ -189,7 +189,7 @@ var (
 		LocalAllowList: LocalAllowList{Interfaces: make(map[string]bool)},
 	}
 
-	defaultOutbound = []OutboundRule{
+	DefaultOutbound = []OutboundRule{
 		{
 			Port:   "any",
 			Proto:  "any",
@@ -245,7 +245,7 @@ func GenerateConfigTemplate() HostConfig {
 		Listen:        defaultListen,
 		Tun:           defaultTun,
 		Handshake:     defaultHandshake,
-		Outbound:      defaultOutbound,
+		Outbound:      DefaultOutbound,
 		//Inbound:       defaultInbound,
 	}
 }
