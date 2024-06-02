@@ -57,6 +57,10 @@ func (m *RuleMongodbRepository) Create(ctx context.Context, userID string, rule 
 }
 
 func (m *RuleMongodbRepository) Gets(ctx context.Context, userID string, ids []string) ([]*entity.Rule, error) {
+	if userID == "" || len(ids) == 0 {
+		return nil, code.InvalidParameter
+	}
+
 	filter := bson.M{
 		"user_id": userID,
 		"_id":     bson.M{"$in": ids},

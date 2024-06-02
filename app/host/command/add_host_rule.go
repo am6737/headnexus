@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"errors"
+	"fmt"
 	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/domain/host/entity"
@@ -48,6 +49,8 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 		return nil, err
 	}
 
+	fmt.Println("更新前配置 host.Config.Outbound => ", host.Config.Outbound)
+
 	if err := h.repos.HostRuleRepo.AddHostRule(ctx, host.ID, cmd.Rules...); err != nil {
 		h.logger.WithError(err).Error("add host rule failed")
 		return nil, err
@@ -60,6 +63,8 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 		h.logger.WithError(err).Error("list host rule failed")
 		return nil, err
 	}
+
+	host.Config.Inbound = make([]config.InboundRule, 0)
 
 	var rules []*entity.HostRule
 	for _, v := range hostRules {
@@ -98,6 +103,8 @@ func (h *addHostRuleHandler) Handle(ctx context.Context, cmd *AddHostRule) ([]*e
 			})
 		}
 	}
+
+	fmt.Println("更新后配置 host.Config.Outbound => ", host.Config.Outbound)
 
 	_, err = h.repos.HostRepo.Update(ctx, host)
 	if err != nil {

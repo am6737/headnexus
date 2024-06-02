@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	"errors"
+	"fmt"
 	ctime "github.com/am6737/headnexus/common/time"
 	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/domain/host/repository"
@@ -117,6 +118,8 @@ func (h *HostMongodbRepository) ListHostRule(ctx context.Context, opts *entity.L
 	if opts.Action != nil {
 		filter["action"] = opts.Action
 	}
+
+	fmt.Println("filter => ", filter)
 
 	cursor, err := h.hostRuleCollection.Find(ctx, filter)
 	if err != nil {

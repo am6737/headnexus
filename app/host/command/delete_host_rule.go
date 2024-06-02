@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"fmt"
 	"github.com/am6737/headnexus/config"
 	"github.com/am6737/headnexus/domain/host/entity"
 	"github.com/am6737/headnexus/infra/persistence"
@@ -41,7 +40,6 @@ func (h *deleteHostRuleHandler) Handle(ctx context.Context, cmd *DeleteHostRule)
 		h.logger.WithError(err).Errorf("failed to get host")
 		return err
 	}
-	fmt.Println("host => ", host)
 	if host.Owner != cmd.UserID {
 		return code.Forbidden
 	}
@@ -51,7 +49,7 @@ func (h *deleteHostRuleHandler) Handle(ctx context.Context, cmd *DeleteHostRule)
 		return err
 	}
 
-	rules, err := h.repos.RuleRepo.Find(ctx, cmd.UserID, &entity.RuleFindOptions{
+	hostRules, err := h.repos.HostRuleRepo.ListHostRule(ctx, &entity.ListHostRuleOptions{
 		HostID: cmd.HostID,
 	})
 	if err != nil {
@@ -59,19 +57,33 @@ func (h *deleteHostRuleHandler) Handle(ctx context.Context, cmd *DeleteHostRule)
 		return err
 	}
 
-	host.Config.Outbound = make([]config.OutboundRule, 0)
-	host.Config.Inbound = make([]config.InboundRule, 0)
+	var ruleids []string
+	for _, rule := range hostRules {
+		ruleids = append(ruleids, rule.RuleID)
+	}
+
+	var rules []*entity.Rule
+	if len(ruleids) > 0 {
+		rules, err = h.repos.RuleRepo.Gets(ctx, cmd.UserID, ruleids)
+		if err != nil {
+			h.logger.WithError(err).Errorf("failed to find rule")
+			return err
+		}
+	}
+
+	host.Config.Outbound = append([]config.OutboundRule{}, config.DefaultOutbound...)
+	host.Config.Inbound = []config.InboundRule{}
 
 	for _, rule := range rules {
-		if rule.Type == entity.RuleTypeOutbound {
+		switch rule.Type {
+		case entity.RuleTypeOutbound:
 			host.Config.Outbound = append(host.Config.Outbound, config.OutboundRule{
 				Port:   rule.Port,
 				Proto:  rule.Proto.String(),
 				Host:   strings.Split(rule.Host, ","),
 				Action: rule.Action.String(),
 			})
-		}
-		if rule.Type == entity.RuleTypeInbound {
+		case entity.RuleTypeInbound:
 			host.Config.Inbound = append(host.Config.Inbound, config.InboundRule{
 				Port:   rule.Port,
 				Proto:  rule.Proto.String(),
